@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "colorswap",
+	"version": "${version}",
+	"name": "Color Swap",
+	"description": "A colorful speed minigame for Minecraft.",
+	"authors": [
+		"haykam821"
+	],
+	"contact": {
+		"homepage": "https://github.com/haykam821/Color-Swap#readme",
+		"issues": "https://github.com/haykam821/Color-Swap/issues"
+	},
+	"entrypoints": {
+		"main": [
+			"io.github.haykam821.colorswap.Main"
+		]
+	},
+	"license": "MIT",
+	"icon": "assets/colorswap/icon.png",
+	"depends": {
+		"fabricloader": ">=0.4.0"
+	}
+}
