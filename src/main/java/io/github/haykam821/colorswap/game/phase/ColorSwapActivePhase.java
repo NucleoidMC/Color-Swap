@@ -1,6 +1,7 @@
 package io.github.haykam821.colorswap.game.phase;
 
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
@@ -22,7 +23,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -118,6 +118,11 @@ public class ColorSwapActivePhase {
 		}
 	}
 
+	private Block getPlatformBlock(Random random) {
+		ColorSwapMapProvider provider = (ColorSwapMapProvider) this.config.getMapConfig().getProvider();
+		return provider.getPlatformBlocks().getRandom(random);
+	}
+
 	public void placeTile(Game game, BlockPos.Mutable origin, int size, BlockState state) {
 		World world = game.getMap().getWorld();
 
@@ -142,7 +147,7 @@ public class ColorSwapActivePhase {
 			for (int z = origin.getZ(); z < provider.z * provider.tileSize; z += provider.tileSize) {
 				pos.set(x, origin.getY(), z);
 
-				BlockState state = BlockTags.WOOL.getRandom(game.getWorld().getRandom()).getDefaultState();
+				BlockState state = this.getPlatformBlock(game.getWorld().getRandom()).getDefaultState();
 				this.placeTile(game, pos, provider.tileSize, state);
 			}
 		}
@@ -185,7 +190,7 @@ public class ColorSwapActivePhase {
 			if (this.swapBlock == null) {
 				this.swap(game);
 
-				this.swapBlock = BlockTags.WOOL.getRandom(game.getWorld().getRandom());
+				this.swapBlock = this.getPlatformBlock(game.getWorld().getRandom());
 				this.giveSwapBlocks(game);
 
 				this.ticksUntilSwap = 20 * 4;

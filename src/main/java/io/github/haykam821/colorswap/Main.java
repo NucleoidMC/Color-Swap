@@ -4,10 +4,13 @@ import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapProvider;
 import io.github.haykam821.colorswap.game.phase.ColorSwapWaitingPhase;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.gegy1000.plasmid.game.GameType;
 import net.gegy1000.plasmid.game.config.GameMapConfig;
 import net.gegy1000.plasmid.game.map.provider.MapProvider;
+import net.minecraft.block.Block;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
@@ -28,6 +31,9 @@ public class Main implements ModInitializer {
 			return ColorSwapWaitingPhase.open(map, config);
 		});
 	}, ColorSwapConfig.CODEC);
+
+	private static final Identifier PLATFORM_BLOCKS_ID = new Identifier(MOD_ID, "platform_blocks");
+	public static final Tag<Block> PLATFORM_BLOCKS = TagRegistry.block(PLATFORM_BLOCKS_ID);
 
 	@Override
 	public void onInitialize() {

@@ -10,7 +10,8 @@
 		"provider": {
 			"type": "colorswap:color_swap",
 			"x": 12,
-			"z": 12
+			"z": 12,
+			"platformBlocks": "colorswap:platform_blocks"
 		}
 	},
 	"players": {

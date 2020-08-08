@@ -5,14 +5,19 @@ import java.util.concurrent.CompletableFuture;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import io.github.haykam821.colorswap.Main;
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import net.gegy1000.plasmid.game.map.GameMap;
 import net.gegy1000.plasmid.game.map.GameMapBuilder;
 import net.gegy1000.plasmid.game.map.provider.MapProvider;
 import net.gegy1000.plasmid.world.BlockBounds;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.Tag;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 public class ColorSwapMapProvider implements MapProvider<ColorSwapConfig> {
@@ -22,7 +27,8 @@ public class ColorSwapMapProvider implements MapProvider<ColorSwapConfig> {
 			Codec.INT.fieldOf("z").forGetter(map -> map.z),
 			Codec.INT.optionalFieldOf("tileSize", 3).forGetter(map -> map.tileSize),
 			BlockState.CODEC.optionalFieldOf("defaultState", Blocks.WHITE_WOOL.getDefaultState()).forGetter(map -> map.defaultState),
-			BlockState.CODEC.optionalFieldOf("emptyState", Blocks.AIR.getDefaultState()).forGetter(map -> map.emptyState)
+			BlockState.CODEC.optionalFieldOf("emptyState", Blocks.AIR.getDefaultState()).forGetter(map -> map.emptyState),
+			Identifier.CODEC.fieldOf("platformBlocks").forGetter(map -> map.platformBlocks)
 		).apply(instance, ColorSwapMapProvider::new);
 	});
 
@@ -31,13 +37,15 @@ public class ColorSwapMapProvider implements MapProvider<ColorSwapConfig> {
 	public final int tileSize;
 	public final BlockState defaultState;
 	public final BlockState emptyState;
+	private final Identifier platformBlocks;
 
-	public ColorSwapMapProvider(int x, int z, int tileSize, BlockState defaultState, BlockState emptyState) {
+	public ColorSwapMapProvider(int x, int z, int tileSize, BlockState defaultState, BlockState emptyState, Identifier platformBlocks) {
 		this.x = x;
 		this.z = z;
 		this.tileSize = tileSize;
 		this.defaultState = defaultState;
 		this.emptyState = emptyState;
+		this.platformBlocks = platformBlocks;
 	}
 
 	@Override
@@ -57,6 +65,11 @@ public class ColorSwapMapProvider implements MapProvider<ColorSwapConfig> {
 		for (BlockPos pos : bounds.iterate()) {
 			builder.setBlockState(pos, this.defaultState);
 		}
+	}
+
+	public Tag<Block> getPlatformBlocks() {
+		Tag<Block> tag = BlockTags.getContainer().get(this.platformBlocks);
+		return tag == null ? Main.PLATFORM_BLOCKS : tag;
 	}
 
 	@Override
