@@ -221,7 +221,7 @@ public class ColorSwapActivePhase {
 			PlayerRef winnerRef = this.players.iterator().next();
 			PlayerEntity winner = winnerRef.getEntity(this.world);
 			if (winner != null) {
-				return winner.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
+				return winner.getDisplayName().shallowCopy().append(" has won the game!").formatted(Formatting.GOLD);
 			}
 		}
 		return new LiteralText("Nobody won the game!").formatted(Formatting.GOLD);
