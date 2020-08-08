@@ -1,67 +1,78 @@
 package io.github.haykam821.colorswap.game.phase;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
-import net.gegy1000.plasmid.game.Game;
-import net.gegy1000.plasmid.game.JoinResult;
+import io.github.haykam821.colorswap.game.map.ColorSwapMap;
+import io.github.haykam821.colorswap.game.map.ColorSwapMapBuilder;
+import net.gegy1000.plasmid.game.GameWorld;
+import net.gegy1000.plasmid.game.GameWorldState;
 import net.gegy1000.plasmid.game.StartResult;
 import net.gegy1000.plasmid.game.config.PlayerConfig;
 import net.gegy1000.plasmid.game.event.OfferPlayerListener;
 import net.gegy1000.plasmid.game.event.PlayerAddListener;
 import net.gegy1000.plasmid.game.event.PlayerDeathListener;
 import net.gegy1000.plasmid.game.event.RequestStartListener;
-import net.gegy1000.plasmid.game.map.GameMap;
+import net.gegy1000.plasmid.game.player.JoinResult;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.concurrent.CompletableFuture;
+
 public class ColorSwapWaitingPhase {
+	private final GameWorld gameWorld;
+	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
 
-	public ColorSwapWaitingPhase(GameMap map, ColorSwapConfig config) {
+	public ColorSwapWaitingPhase(GameWorld gameWorld, ColorSwapMap map, ColorSwapConfig config) {
+		this.gameWorld = gameWorld;
+		this.map = map;
 		this.config = config;
 	}
 
-	public static Game open(GameMap map, ColorSwapConfig config) {
-		ColorSwapWaitingPhase game = new ColorSwapWaitingPhase(map, config);
+	public static CompletableFuture<Void> open(GameWorldState gameState, ColorSwapConfig config) {
+		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(config);
 
-		Game.Builder builder = Game.builder();
-		builder.setMap(map);
+		return mapBuilder.create().thenAccept(map -> {
+			GameWorld gameWorld = gameState.openWorld(map.createGenerator());
 
-		ColorSwapActivePhase.setRules(builder);
+			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(gameWorld, map, config);
 
-		// Listeners
-		builder.on(PlayerAddListener.EVENT, game::addPlayer);
-		builder.on(PlayerDeathListener.EVENT, game::onPlayerDeath);
-		builder.on(OfferPlayerListener.EVENT, game::offerPlayer);
-		builder.on(RequestStartListener.EVENT, game::requestStart);
+			gameWorld.newGame(game -> {
+				ColorSwapActivePhase.setRules(game);
 
-		return builder.build();
+				// Listeners
+				game.on(PlayerAddListener.EVENT, waiting::addPlayer);
+				game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
+				game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
+				game.on(RequestStartListener.EVENT, waiting::requestStart);
+			});
+		});
 	}
 
-	private boolean isFull(Game game) {
-		return game.getPlayerCount() >= this.config.getPlayerConfig().getMaxPlayers();
+	private boolean isFull() {
+		return this.gameWorld.getPlayerCount() >= this.config.getPlayerConfig().getMaxPlayers();
 	}
 
-	public JoinResult offerPlayer(Game game, ServerPlayerEntity player) {
-		return this.isFull(game) ? JoinResult.gameFull() : JoinResult.ok();
+	public JoinResult offerPlayer(ServerPlayerEntity player) {
+		return this.isFull() ? JoinResult.gameFull() : JoinResult.ok();
 	}
 
-	public StartResult requestStart(Game game) {
+	public StartResult requestStart() {
 		PlayerConfig playerConfig = this.config.getPlayerConfig();
-		if (game.getPlayerCount() < playerConfig.getMinPlayers()) {
+		if (this.gameWorld.getPlayerCount() < playerConfig.getMinPlayers()) {
 			return StartResult.notEnoughPlayers();
 		}
 
-		Game activeGame = ColorSwapActivePhase.open(game.getMap(), this.config, game.getPlayers());
-		return StartResult.ok(activeGame);
+		ColorSwapActivePhase.open(this.gameWorld, this.map, this.config);
+		return StartResult.ok();
 	}
 
-	public void addPlayer(Game game, ServerPlayerEntity player) {
-		ColorSwapActivePhase.spawn(game.getMap(), player);
+	public void addPlayer(ServerPlayerEntity player) {
+		ColorSwapActivePhase.spawn(this.gameWorld.getWorld(), this.map, player);
 	}
 
-	public boolean onPlayerDeath(Game game, ServerPlayerEntity player, DamageSource source) {
+	public boolean onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
-		ColorSwapActivePhase.spawn(game.getMap(), player);
+		ColorSwapActivePhase.spawn(this.gameWorld.getWorld(), this.map, player);
 		return true;
 	}
 }
