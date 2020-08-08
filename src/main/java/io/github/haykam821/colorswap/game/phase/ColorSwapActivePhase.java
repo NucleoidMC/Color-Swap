@@ -165,7 +165,7 @@ public class ColorSwapActivePhase {
 			playerRef.ifOnline(this.world, player -> {
 				player.inventory.clear();
 				for (int slot = 0; slot < 9; slot++) {
-					player.inventory.setStack(slot, stack);
+					player.inventory.setStack(slot, stack.copy());
 				}
 
 				// Update inventory
