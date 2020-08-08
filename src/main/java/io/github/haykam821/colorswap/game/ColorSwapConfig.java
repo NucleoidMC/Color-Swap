@@ -9,8 +9,8 @@ import net.gegy1000.plasmid.game.config.PlayerConfig;
 public class ColorSwapConfig implements GameConfig {
 	public static final Codec<ColorSwapConfig> CODEC = RecordCodecBuilder.create(instance -> {
 		return instance.group(
-			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
-			PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig)
+				ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
+				PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig)
 		).apply(instance, ColorSwapConfig::new);
 	});
 
