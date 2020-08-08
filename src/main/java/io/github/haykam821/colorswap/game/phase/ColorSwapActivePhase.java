@@ -19,6 +19,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -111,6 +112,10 @@ public class ColorSwapActivePhase {
 
 	public void erase() {
 		ColorSwapMapConfig mapConfig = this.config.getMapConfig();
+
+ 		for (ServerPlayerEntity player : this.gameWorld.getPlayers()) {
+			player.playSound(this.config.getSwapSound(), SoundCategory.BLOCKS, 1, 1.5f);
+		}
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 		for (int x = 0; x < mapConfig.x * mapConfig.tileSize; x += mapConfig.tileSize) {
