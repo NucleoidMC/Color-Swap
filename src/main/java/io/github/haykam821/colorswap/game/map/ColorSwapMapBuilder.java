@@ -20,7 +20,12 @@ public class ColorSwapMapBuilder {
 			ColorSwapMapConfig mapConfig = this.config.getMapConfig();
 
 			MapTemplate template = MapTemplate.createEmpty();
-			BlockBounds platform = new BlockBounds(BlockPos.ORIGIN, new BlockPos(mapConfig.x * mapConfig.tileSize - 1, 64, mapConfig.z * mapConfig.tileSize - 1));
+
+            BlockPos origin = new BlockPos(0, 64, 0);
+            BlockBounds platform = new BlockBounds(
+                    origin,
+                    origin.add(mapConfig.x * mapConfig.tileSize - 1, 0, mapConfig.z * mapConfig.tileSize - 1)
+            );
 
 			for (BlockPos pos : platform.iterate()) {
 				template.setBlockState(pos, this.config.getMapConfig().defaultState);
