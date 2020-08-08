@@ -1,5 +1,6 @@
 package io.github.haykam821.colorswap.game.phase;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
@@ -165,6 +166,19 @@ public class ColorSwapActivePhase {
 		}
 	}
 
+	private void checkElimination(Game game) {
+		Iterator<PlayerRef> iterator = this.players.iterator();
+		while (iterator.hasNext()) {
+			PlayerRef playerRef = iterator.next();
+			playerRef.ifOnline(game.getWorld(), player -> {
+				if (this.isBelowPlatform(player, game)) {
+					this.eliminate(game, player, false);
+					iterator.remove();
+				}
+			});
+		}
+	}
+
 	public void tick(Game game) {
 		this.ticksUntilSwap -= 1;
 		if (this.ticksUntilSwap == 0) {
@@ -183,13 +197,7 @@ public class ColorSwapActivePhase {
 			}
 		}
 
-		for (PlayerRef playerRef : this.players) {
-			playerRef.ifOnline(game.getWorld(), player -> {
-				if (this.isBelowPlatform(player, game)) {
-					this.eliminate(game, player);
-				}
-			});
-		}
+		this.checkElimination(game);
 
 		if (this.players.size() < 2) {
 			if (this.players.size() == 1 && this.singleplayer) return;
@@ -224,23 +232,25 @@ public class ColorSwapActivePhase {
 		}
 	}
 
-	public void eliminate(Game game, PlayerEntity eliminatedPlayer) {
+	public void eliminate(Game game, PlayerEntity eliminatedPlayer, boolean remove) {
 		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
 		game.onlinePlayers().forEach(player -> {
 			player.sendMessage(message, false);
 		});
 
-		this.players.remove(PlayerRef.of(eliminatedPlayer));
+		if (remove) {
+			this.players.remove(PlayerRef.of(eliminatedPlayer));
+		}
 		this.setSpectator(eliminatedPlayer);
 	}
 
 	public boolean onPlayerDeath(Game game, PlayerEntity player, DamageSource source) {
-		this.eliminate(game, player);
+		this.eliminate(game, player, true);
 		return true;
 	}
 
 	public void rejoinPlayer(Game game, PlayerEntity player) {
-		this.eliminate(game, player);
+		this.eliminate(game, player, true);
 	}
 
 	public static void spawn(GameMap map, ServerPlayerEntity player) {
