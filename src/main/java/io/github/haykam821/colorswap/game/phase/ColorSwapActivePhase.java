@@ -45,6 +45,7 @@ public class ColorSwapActivePhase {
 	private Block swapBlock;
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar = new ColorSwapTimerBar();
+	private int rounds = 0;
 
 	private boolean opened;
 
@@ -55,7 +56,7 @@ public class ColorSwapActivePhase {
 		this.config = config;
 		this.players = players;
 
-		this.maxTicksUntilSwap = this.config.getSwapTime();
+		this.maxTicksUntilSwap = this.getSwapTime();
 		this.ticksUntilSwap = this.maxTicksUntilSwap;
 	}
 
@@ -205,6 +206,21 @@ public class ColorSwapActivePhase {
 		return this.ticksUntilSwap / (float) this.maxTicksUntilSwap;
 	}
 
+	private int getSwapTime() {
+		int swapTime = this.config.getSwapTime();
+		if (swapTime >= 0) return swapTime;
+
+		double swapSeconds = Math.pow(5, -0.04 * this.rounds + 1) + 0.5;
+		return (int) (swapSeconds * 20);
+	}
+
+	private int getEraseTime() {
+		int eraseTime = this.config.getEraseTime();
+		if (eraseTime >= 0) return eraseTime;
+
+		return this.rounds > 10 ? 20 : 20 * 2;
+	}
+
 	public void tick() {
 		this.ticksUntilSwap -= 1;
 		this.timerBar.tick(this);
@@ -215,12 +231,13 @@ public class ColorSwapActivePhase {
 				this.swapBlock = this.getPlatformBlock(this.world.getRandom());
 				this.giveSwapBlocks();
 
-				this.maxTicksUntilSwap = this.config.getSwapTime();
+				this.rounds += 1;
+				this.maxTicksUntilSwap = this.getSwapTime();
 			} else {
 				this.erase();
 				this.swapBlock = null;
 
-				this.maxTicksUntilSwap = this.config.getEraseTime();
+				this.maxTicksUntilSwap = this.getEraseTime();
 			}
 			this.ticksUntilSwap = this.maxTicksUntilSwap;
 		}
