@@ -40,8 +40,8 @@ public class ColorSwapActivePhase {
 	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
 	private final Set<PlayerRef> players;
-	private int maxTicksUntilSwap = 20 * 4;
-	private int ticksUntilSwap = this.maxTicksUntilSwap;
+	private int maxTicksUntilSwap;
+	private int ticksUntilSwap;
 	private Block swapBlock;
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar = new ColorSwapTimerBar();
@@ -54,6 +54,9 @@ public class ColorSwapActivePhase {
 		this.map = map;
 		this.config = config;
 		this.players = players;
+
+		this.maxTicksUntilSwap = this.config.getSwapTime();
+		this.ticksUntilSwap = this.maxTicksUntilSwap;
 	}
 
 	public static void setRules(Game game) {
@@ -212,12 +215,12 @@ public class ColorSwapActivePhase {
 				this.swapBlock = this.getPlatformBlock(this.world.getRandom());
 				this.giveSwapBlocks();
 
-				this.maxTicksUntilSwap = 20 * 4;
+				this.maxTicksUntilSwap = this.config.getSwapTime();
 			} else {
 				this.erase();
 				this.swapBlock = null;
 
-				this.maxTicksUntilSwap = 20 * 2;
+				this.maxTicksUntilSwap = this.config.getEraseTime();
 			}
 			this.ticksUntilSwap = this.maxTicksUntilSwap;
 		}
