@@ -1,10 +1,12 @@
 package io.github.haykam821.colorswap.game.phase;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
+import io.github.haykam821.colorswap.game.ColorSwapTimerBar;
 import io.github.haykam821.colorswap.game.map.ColorSwapMap;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import net.gegy1000.plasmid.game.Game;
 import net.gegy1000.plasmid.game.GameWorld;
+import net.gegy1000.plasmid.game.event.GameCloseListener;
 import net.gegy1000.plasmid.game.event.GameOpenListener;
 import net.gegy1000.plasmid.game.event.GameTickListener;
 import net.gegy1000.plasmid.game.event.PlayerAddListener;
@@ -38,9 +40,11 @@ public class ColorSwapActivePhase {
 	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
 	private final Set<PlayerRef> players;
-	private int ticksUntilSwap = 20 * 4;
+	private int maxTicksUntilSwap = 20 * 4;
+	private int ticksUntilSwap = this.maxTicksUntilSwap;
 	private Block swapBlock;
 	private boolean singleplayer;
+	private final ColorSwapTimerBar timerBar = new ColorSwapTimerBar();
 
 	private boolean opened;
 
@@ -68,6 +72,7 @@ public class ColorSwapActivePhase {
 			ColorSwapActivePhase.setRules(game);
 
 			// Listeners
+			game.on(GameCloseListener.EVENT, active::close);
 			game.on(GameOpenListener.EVENT, active::open);
 			game.on(GameTickListener.EVENT, active::tick);
 			game.on(PlayerAddListener.EVENT, active::addPlayer);
@@ -87,6 +92,10 @@ public class ColorSwapActivePhase {
 		}
 
 		this.opened = true;
+	}
+
+	public void close() {
+		this.timerBar.remove();
 	}
 
 	public boolean isBelowPlatform(PlayerEntity player) {
@@ -189,8 +198,13 @@ public class ColorSwapActivePhase {
 		}
 	}
 
+	public float getTimerBarPercent() {
+		return this.ticksUntilSwap / (float) this.maxTicksUntilSwap;
+	}
+
 	public void tick() {
 		this.ticksUntilSwap -= 1;
+		this.timerBar.tick(this);
 		if (this.ticksUntilSwap == 0) {
 			if (this.swapBlock == null) {
 				this.swap();
@@ -198,13 +212,14 @@ public class ColorSwapActivePhase {
 				this.swapBlock = this.getPlatformBlock(this.world.getRandom());
 				this.giveSwapBlocks();
 
-				this.ticksUntilSwap = 20 * 4;
+				this.maxTicksUntilSwap = 20 * 4;
 			} else {
 				this.erase();
 				this.swapBlock = null;
 
-				this.ticksUntilSwap = 20 * 2;
+				this.maxTicksUntilSwap = 20 * 2;
 			}
+			this.ticksUntilSwap = this.maxTicksUntilSwap;
 		}
 
 		this.checkElimination();
@@ -236,12 +251,13 @@ public class ColorSwapActivePhase {
 		player.setGameMode(GameMode.SPECTATOR);
 	}
 
-	public void addPlayer(PlayerEntity player) {
+	public void addPlayer(ServerPlayerEntity player) {
 		if (!this.players.contains(PlayerRef.of(player))) {
 			this.setSpectator(player);
 		} else if (this.opened) {
 			this.eliminate(player, true);
 		}
+		this.timerBar.addPlayer(player);
 	}
 
 	public void eliminate(PlayerEntity eliminatedPlayer, boolean remove) {
