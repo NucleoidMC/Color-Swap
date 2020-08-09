@@ -29,7 +29,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +44,7 @@ public class ColorSwapActivePhase {
 	private final Set<PlayerRef> players;
 	private int maxTicksUntilSwap;
 	private int ticksUntilSwap;
+	private List<Block> lastSwapBlocks = new ArrayList<>();
 	private Block swapBlock;
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar = new ColorSwapTimerBar();
@@ -139,9 +142,13 @@ public class ColorSwapActivePhase {
 		}
 	}
 
-	private Block getPlatformBlock(Random random) {
+	private Block getPlatformBlock() {
 		ColorSwapMapConfig mapConfig = this.config.getMapConfig();
-		return mapConfig.getPlatformBlocks().getRandom(random);
+		return mapConfig.getPlatformBlocks().getRandom(this.world.getRandom());
+	}
+
+	private Block getSwapBlock() {
+		return this.lastSwapBlocks.get(this.world.getRandom().nextInt(this.lastSwapBlocks.size()));
 	}
 
 	public void placeTile(BlockPos.Mutable origin, int size, BlockState state) {
@@ -159,14 +166,19 @@ public class ColorSwapActivePhase {
 
 	public void swap() {
 		ColorSwapMapConfig mapConfig = this.config.getMapConfig();
+		this.lastSwapBlocks.clear();
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 		for (int x = 0; x < mapConfig.x * mapConfig.tileSize; x += mapConfig.tileSize) {
 			for (int z = 0; z < mapConfig.z * mapConfig.tileSize; z += mapConfig.tileSize) {
 				pos.set(x, 64, z);
 
-				BlockState state = this.getPlatformBlock(this.world.getRandom()).getDefaultState();
-				this.placeTile(pos, mapConfig.tileSize, state);
+				Block block = this.getPlatformBlock();
+				if (!this.lastSwapBlocks.contains(block)) {
+					this.lastSwapBlocks.add(block);
+				}
+
+				this.placeTile(pos, mapConfig.tileSize, block.getDefaultState());
 			}
 		}
 	}
@@ -228,7 +240,7 @@ public class ColorSwapActivePhase {
 			if (this.swapBlock == null) {
 				this.swap();
 
-				this.swapBlock = this.getPlatformBlock(this.world.getRandom());
+				this.swapBlock = this.getSwapBlock();
 				this.giveSwapBlocks();
 
 				this.rounds += 1;
