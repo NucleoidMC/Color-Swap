@@ -68,6 +68,7 @@ public class ColorSwapActivePhase {
 		game.setRule(GameRule.ALLOW_PVP, RuleResult.DENY);
 		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
 		game.setRule(GameRule.ENABLE_HUNGER, RuleResult.DENY);
+		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
 	}
 
 	public static void open(GameWorld gameWorld, ColorSwapMap map, ColorSwapConfig config) {
