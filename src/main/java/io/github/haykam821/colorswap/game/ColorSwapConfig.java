@@ -2,14 +2,12 @@ package io.github.haykam821.colorswap.game;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
-import net.gegy1000.plasmid.game.config.GameConfig;
-import net.gegy1000.plasmid.game.config.PlayerConfig;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import xyz.nucleoid.plasmid.game.config.PlayerConfig;
 
-public class ColorSwapConfig implements GameConfig {
+public class ColorSwapConfig {
 	public static final Codec<ColorSwapConfig> CODEC = RecordCodecBuilder.create(instance -> {
 		return instance.group(
 			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),

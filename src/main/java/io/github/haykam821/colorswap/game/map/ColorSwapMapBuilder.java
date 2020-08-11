@@ -1,8 +1,8 @@
 package io.github.haykam821.colorswap.game.map;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
-import net.gegy1000.plasmid.game.map.template.MapTemplate;
-import net.gegy1000.plasmid.util.BlockBounds;
+import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.util.BlockBounds;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 

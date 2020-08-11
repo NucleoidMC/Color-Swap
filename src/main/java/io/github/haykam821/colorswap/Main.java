@@ -4,7 +4,7 @@ import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.phase.ColorSwapWaitingPhase;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.tag.TagRegistry;
-import net.gegy1000.plasmid.game.GameType;
+import xyz.nucleoid.plasmid.game.GameType;
 import net.minecraft.block.Block;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
