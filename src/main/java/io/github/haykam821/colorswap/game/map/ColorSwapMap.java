@@ -3,6 +3,7 @@ package io.github.haykam821.colorswap.game.map;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.util.BlockBounds;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 
@@ -19,7 +20,7 @@ public final class ColorSwapMap {
 		return this.platform;
 	}
 
-	public ChunkGenerator createGenerator() {
-		return new TemplateChunkGenerator(this.template, BlockPos.ORIGIN);
+	public ChunkGenerator createGenerator(MinecraftServer server) {
+		return new TemplateChunkGenerator(server, this.template, BlockPos.ORIGIN);
 	}
 }

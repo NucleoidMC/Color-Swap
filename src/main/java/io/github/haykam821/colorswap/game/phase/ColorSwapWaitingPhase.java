@@ -4,9 +4,10 @@ import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.map.ColorSwapMap;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapBuilder;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.GameMode;
+import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
@@ -30,18 +31,18 @@ public class ColorSwapWaitingPhase {
 		this.config = config;
 	}
 
-	public static CompletableFuture<Void> open(MinecraftServer server, ColorSwapConfig config) {
-		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(config);
+	public static CompletableFuture<Void> open(GameOpenContext<ColorSwapConfig> context) {
+		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(context.getConfig());
 
 		return mapBuilder.create().thenAccept(map -> {
 			BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-					.setGenerator(map.createGenerator())
-					.setDefaultGameMode(GameMode.SPECTATOR);
-			GameWorld gameWorld = GameWorld.open(server, worldConfig);
+					.setGenerator(map.createGenerator(context.getServer()))
+					.setDefaultGameMode(GameMode.ADVENTURE);
+			GameWorld gameWorld = context.openWorld(worldConfig);
 
-			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(gameWorld, map, config);
+			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(gameWorld, map, context.getConfig());
 
-			gameWorld.newGame(game -> {
+			gameWorld.openGame(game -> {
 				ColorSwapActivePhase.setRules(game);
 
 				// Listeners
@@ -75,9 +76,9 @@ public class ColorSwapWaitingPhase {
 		ColorSwapActivePhase.spawn(this.gameWorld.getWorld(), this.map, player);
 	}
 
-	public boolean onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
 		ColorSwapActivePhase.spawn(this.gameWorld.getWorld(), this.map, player);
-		return true;
+		return ActionResult.SUCCESS;
 	}
 }

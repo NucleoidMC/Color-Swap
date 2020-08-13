@@ -3,10 +3,10 @@ package io.github.haykam821.colorswap.game.map;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.haykam821.colorswap.Main;
+import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 
@@ -39,7 +39,7 @@ public class ColorSwapMapConfig {
 	}
 
 	public Tag<Block> getPlatformBlocks() {
-		Tag<Block> tag = BlockTags.getContainer().get(this.platformBlocks);
+		Tag<Block> tag = TagRegistry.block(this.platformBlocks);
 		return tag == null ? Main.PLATFORM_BLOCKS : tag;
 	}
 }

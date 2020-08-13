@@ -32,6 +32,6 @@ public class ColorSwapMapBuilder {
 			}
 
 			return new ColorSwapMap(template, platform);
-		}, Util.getServerWorkerExecutor());
+		}, Util.getMainWorkerExecutor());
 	}
 }
