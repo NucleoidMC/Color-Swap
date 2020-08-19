@@ -1,24 +1,29 @@
 package io.github.haykam821.colorswap.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import net.minecraft.entity.boss.BossBar;
-import net.minecraft.entity.boss.ServerBossBar;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.widget.BossBarWidget;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColorSwapTimerBar {
 	private static final List<Formatting> TITLE_COLORS = new ArrayList<>();
 
 	private Formatting color = Formatting.RED;
-	private final ServerBossBar bar = new ServerBossBar(new LiteralText("Color Swap").formatted(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
+	private final BossBarWidget bar;
+
+	public ColorSwapTimerBar(GameWorld gameWorld) {
+		this.bar = BossBarWidget.open(gameWorld.getPlayerSet(), this.title(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
+	}
 
 	public void tick(ColorSwapActivePhase phase) {
 		float percent = phase.getTimerBarPercent();
-		this.bar.setPercent(percent);
+		this.bar.setProgress(percent);
 
 		if (percent == 0) {
 			this.cycleTitleColor();
@@ -26,17 +31,16 @@ public class ColorSwapTimerBar {
 	}
 
 	public void remove() {
-		this.bar.clearPlayers();
-		this.bar.setVisible(false);
-	}
-
-	public void addPlayer(ServerPlayerEntity player) {
-		this.bar.addPlayer(player);
+		this.bar.close();
 	}
 
 	private void cycleTitleColor() {
 		this.color = TITLE_COLORS.get((TITLE_COLORS.indexOf(this.color) + 1) % TITLE_COLORS.size());
-		this.bar.setName(this.bar.getName().copy().formatted(this.color));
+		this.bar.setTitle(this.title(this.color));
+	}
+
+	private Text title(Formatting formatting) {
+		return new LiteralText("Color Swap").formatted(formatting);
 	}
 
 	static {
