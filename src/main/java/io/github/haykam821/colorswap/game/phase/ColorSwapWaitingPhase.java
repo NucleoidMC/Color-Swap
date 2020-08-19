@@ -16,7 +16,7 @@ import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.event.RequestStartListener;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
-import xyz.nucleoid.plasmid.game.world.bubble.BubbleWorldConfig;
+import xyz.nucleoid.plasmid.world.bubble.BubbleWorldConfig;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,25 +31,28 @@ public class ColorSwapWaitingPhase {
 		this.config = config;
 	}
 
-	public static CompletableFuture<Void> open(GameOpenContext<ColorSwapConfig> context) {
+	public static CompletableFuture<GameWorld> open(GameOpenContext<ColorSwapConfig> context) {
 		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(context.getConfig());
 
-		return mapBuilder.create().thenAccept(map -> {
+		return mapBuilder.create().thenCompose(map -> {
 			BubbleWorldConfig worldConfig = new BubbleWorldConfig()
 					.setGenerator(map.createGenerator(context.getServer()))
 					.setDefaultGameMode(GameMode.ADVENTURE);
-			GameWorld gameWorld = context.openWorld(worldConfig);
 
-			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(gameWorld, map, context.getConfig());
+			return context.openWorld(worldConfig).thenApply(gameWorld -> {
+				ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(gameWorld, map, context.getConfig());
 
-			gameWorld.openGame(game -> {
-				ColorSwapActivePhase.setRules(game);
+				gameWorld.openGame(game -> {
+					ColorSwapActivePhase.setRules(game);
 
-				// Listeners
-				game.on(PlayerAddListener.EVENT, waiting::addPlayer);
-				game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
-				game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
-				game.on(RequestStartListener.EVENT, waiting::requestStart);
+					// Listeners
+					game.on(PlayerAddListener.EVENT, waiting::addPlayer);
+					game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
+					game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
+					game.on(RequestStartListener.EVENT, waiting::requestStart);
+				});
+
+				return gameWorld;
 			});
 		});
 	}
@@ -65,11 +68,11 @@ public class ColorSwapWaitingPhase {
 	public StartResult requestStart() {
 		PlayerConfig playerConfig = this.config.getPlayerConfig();
 		if (this.gameWorld.getPlayerCount() < playerConfig.getMinPlayers()) {
-			return StartResult.notEnoughPlayers();
+			return StartResult.NOT_ENOUGH_PLAYERS;
 		}
 
 		ColorSwapActivePhase.open(this.gameWorld, this.map, this.config);
-		return StartResult.ok();
+		return StartResult.OK;
 	}
 
 	public void addPlayer(ServerPlayerEntity player) {

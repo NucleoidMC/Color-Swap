@@ -47,7 +47,7 @@ public class ColorSwapActivePhase {
 	private List<Block> lastSwapBlocks = new ArrayList<>();
 	private Block swapBlock;
 	private boolean singleplayer;
-	private final ColorSwapTimerBar timerBar = new ColorSwapTimerBar();
+	private final ColorSwapTimerBar timerBar;
 	private int rounds = 0;
 
 	private boolean opened;
@@ -58,6 +58,8 @@ public class ColorSwapActivePhase {
 		this.map = map;
 		this.config = config;
 		this.players = players;
+
+		this.timerBar = new ColorSwapTimerBar(gameWorld);
 
 		this.maxTicksUntilSwap = this.getSwapTime();
 		this.ticksUntilSwap = this.maxTicksUntilSwap;
@@ -260,10 +262,7 @@ public class ColorSwapActivePhase {
 		if (this.players.size() < 2) {
 			if (this.players.size() == 1 && this.singleplayer) return;
 
-			Text endingMessage = this.getEndingMessage();
-			for (ServerPlayerEntity player : this.gameWorld.getPlayers()) {
-				player.sendMessage(endingMessage, false);
-			}
+			this.gameWorld.getPlayerSet().sendMessage(this.getEndingMessage());
 
 			this.gameWorld.close();
 		}
@@ -290,7 +289,6 @@ public class ColorSwapActivePhase {
 		} else if (this.opened) {
 			this.eliminate(player, true);
 		}
-		this.timerBar.addPlayer(player);
 	}
 
 	public void eliminate(PlayerEntity eliminatedPlayer, boolean remove) {
