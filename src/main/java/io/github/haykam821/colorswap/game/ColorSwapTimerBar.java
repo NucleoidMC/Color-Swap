@@ -18,7 +18,7 @@ public class ColorSwapTimerBar {
 	private final BossBarWidget bar;
 
 	public ColorSwapTimerBar(GameWorld gameWorld) {
-		this.bar = BossBarWidget.open(gameWorld.getPlayerSet(), this.title(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
+		this.bar = BossBarWidget.open(gameWorld.getPlayerSet(), this.getTitleWithColor(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
 	}
 
 	public void tick(ColorSwapActivePhase phase) {
@@ -36,10 +36,10 @@ public class ColorSwapTimerBar {
 
 	private void cycleTitleColor() {
 		this.color = TITLE_COLORS.get((TITLE_COLORS.indexOf(this.color) + 1) % TITLE_COLORS.size());
-		this.bar.setTitle(this.title(this.color));
+		this.bar.setTitle(this.getTitleWithColor(this.color));
 	}
 
-	private Text title(Formatting formatting) {
+	private Text getTitleWithColor(Formatting formatting) {
 		return new LiteralText("Color Swap").formatted(formatting);
 	}
 
