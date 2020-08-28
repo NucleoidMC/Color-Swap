@@ -7,6 +7,8 @@ import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -312,5 +314,6 @@ public class ColorSwapActivePhase {
 	public static void spawn(ServerWorld world, ColorSwapMap map, ServerPlayerEntity player) {
 		Vec3d center = map.getPlatform().getCenter();
 		player.teleport(world, center.getX(), center.getY() + 0.5, center.getZ(), 0, 0);
+		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 20 * 60 * 10, 0, true, false));
 	}
 }
