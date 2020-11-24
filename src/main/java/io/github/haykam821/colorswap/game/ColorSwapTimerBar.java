@@ -5,8 +5,8 @@ import net.minecraft.entity.boss.BossBar;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.widget.BossBarWidget;
+import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +17,8 @@ public class ColorSwapTimerBar {
 	private Formatting color = Formatting.RED;
 	private final BossBarWidget bar;
 
-	public ColorSwapTimerBar(GameWorld gameWorld) {
-		this.bar = BossBarWidget.open(gameWorld.getPlayerSet(), this.getTitleWithColor(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
+	public ColorSwapTimerBar(GlobalWidgets widgets) {
+		this.bar = widgets.addBossBar(this.getTitleWithColor(this.color), BossBar.Color.RED, BossBar.Style.PROGRESS);
 	}
 
 	public void tick(ColorSwapActivePhase phase) {

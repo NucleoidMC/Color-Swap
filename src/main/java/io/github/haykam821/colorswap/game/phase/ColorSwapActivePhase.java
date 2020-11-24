@@ -21,8 +21,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.game.Game;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameLogic;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameCloseListener;
 import xyz.nucleoid.plasmid.game.event.GameOpenListener;
 import xyz.nucleoid.plasmid.game.event.GameTickListener;
@@ -31,6 +31,7 @@ import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.util.PlayerRef;
+import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
 
 public class ColorSwapActivePhase {
 	private final ServerWorld world;
-	private final GameWorld gameWorld;
+	private final GameSpace gameSpace;
 	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
 	private final Set<PlayerRef> players;
@@ -54,20 +55,20 @@ public class ColorSwapActivePhase {
 
 	private boolean opened;
 
-	public ColorSwapActivePhase(GameWorld gameWorld, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players) {
-		this.world = gameWorld.getWorld();
-		this.gameWorld = gameWorld;
+	public ColorSwapActivePhase(GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players, GlobalWidgets widgets) {
+		this.world = gameSpace.getWorld();
+		this.gameSpace = gameSpace;
 		this.map = map;
 		this.config = config;
 		this.players = players;
 
-		this.timerBar = new ColorSwapTimerBar(gameWorld);
+		this.timerBar = new ColorSwapTimerBar(widgets);
 
 		this.maxTicksUntilSwap = this.getSwapTime();
 		this.ticksUntilSwap = this.maxTicksUntilSwap;
 	}
 
-	public static void setRules(Game game) {
+	public static void setRules(GameLogic game) {
 		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
 		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
 		game.setRule(GameRule.HUNGER, RuleResult.DENY);
@@ -76,11 +77,12 @@ public class ColorSwapActivePhase {
 		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
 	}
 
-	public static void open(GameWorld gameWorld, ColorSwapMap map, ColorSwapConfig config) {
-		Set<PlayerRef> players = gameWorld.getPlayers().stream().map(PlayerRef::of).collect(Collectors.toSet());
-		ColorSwapActivePhase active = new ColorSwapActivePhase(gameWorld, map, config, players);
+	public static void open(GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config) {
+		gameSpace.openGame(game -> {
+			GlobalWidgets widgets = new GlobalWidgets(game);
+			Set<PlayerRef> players = gameSpace.getPlayers().stream().map(PlayerRef::of).collect(Collectors.toSet());
+			ColorSwapActivePhase active = new ColorSwapActivePhase(gameSpace, map, config, players, widgets);
 
-		gameWorld.openGame(game -> {
 			ColorSwapActivePhase.setRules(game);
 
 			// Listeners
@@ -134,7 +136,7 @@ public class ColorSwapActivePhase {
 	public void erase() {
 		ColorSwapMapConfig mapConfig = this.config.getMapConfig();
 
- 		for (ServerPlayerEntity player : this.gameWorld.getPlayers()) {
+ 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			player.playSound(this.config.getSwapSound(), SoundCategory.BLOCKS, 1, 1.5f);
 		}
 
@@ -264,9 +266,9 @@ public class ColorSwapActivePhase {
 		if (this.players.size() < 2) {
 			if (this.players.size() == 1 && this.singleplayer) return;
 
-			this.gameWorld.getPlayerSet().sendMessage(this.getEndingMessage());
+			this.gameSpace.getPlayers().sendMessage(this.getEndingMessage());
 
-			this.gameWorld.close();
+			this.gameSpace.close();
 		}
 	}
 
@@ -296,7 +298,7 @@ public class ColorSwapActivePhase {
 	public void eliminate(PlayerEntity eliminatedPlayer, boolean remove) {
 		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
 
-		for (ServerPlayerEntity player : this.gameWorld.getPlayers()) {
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			player.sendMessage(message, false);
 		}
 
