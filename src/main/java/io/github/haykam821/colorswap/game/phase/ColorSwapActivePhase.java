@@ -46,7 +46,7 @@ public class ColorSwapActivePhase {
 	private final ColorSwapConfig config;
 	private final Set<PlayerRef> players;
 	private int maxTicksUntilSwap;
-	private int ticksUntilSwap;
+	private int ticksUntilSwap = 0;
 	private List<Block> lastSwapBlocks = new ArrayList<>();
 	private Block swapBlock;
 	private boolean singleplayer;
@@ -63,9 +63,7 @@ public class ColorSwapActivePhase {
 		this.players = players;
 
 		this.timerBar = new ColorSwapTimerBar(widgets);
-
 		this.maxTicksUntilSwap = this.getSwapTime();
-		this.ticksUntilSwap = this.maxTicksUntilSwap;
 	}
 
 	public static void setRules(GameLogic game) {
@@ -95,8 +93,6 @@ public class ColorSwapActivePhase {
 	}
 
 	public void open() {
-		this.swap();
-
 		this.singleplayer = this.players.size() == 1;
 		for (PlayerRef playerRef : this.players) {
 			playerRef.ifOnline(this.world, player -> {
@@ -243,7 +239,7 @@ public class ColorSwapActivePhase {
 	public void tick() {
 		this.ticksUntilSwap -= 1;
 		this.timerBar.tick(this);
-		if (this.ticksUntilSwap == 0) {
+		if (this.ticksUntilSwap <= 0) {
 			if (this.swapBlock == null) {
 				this.swap();
 
