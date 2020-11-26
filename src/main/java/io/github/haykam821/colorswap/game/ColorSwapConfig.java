@@ -12,7 +12,7 @@ public class ColorSwapConfig {
 		return instance.group(
 			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
 			PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
-			SoundEvent.field_24628.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE).forGetter(ColorSwapConfig::getSwapSound),
+			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE).forGetter(ColorSwapConfig::getSwapSound),
 			Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
 			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime)
 		).apply(instance, ColorSwapConfig::new);
