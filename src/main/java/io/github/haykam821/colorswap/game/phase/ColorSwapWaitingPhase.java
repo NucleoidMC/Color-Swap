@@ -14,6 +14,7 @@ import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.GameWaitingLobby;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.config.PlayerConfig;
+import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.OfferPlayerListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
@@ -46,6 +47,7 @@ public class ColorSwapWaitingPhase {
 			ColorSwapActivePhase.setRules(game);
 
 			// Listeners
+			game.on(GameTickListener.EVENT, waiting::tick);
 			game.on(PlayerAddListener.EVENT, waiting::addPlayer);
 			game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
 			game.on(OfferPlayerListener.EVENT, waiting::offerPlayer);
@@ -53,6 +55,15 @@ public class ColorSwapWaitingPhase {
 		});
 	}
 
+	private void tick() {
+		int minY = this.map.getPlatform().getMin().getY();
+		this.gameSpace.getPlayers().forEach(player -> {
+			if (player.getY() < minY) {
+				ColorSwapActivePhase.spawn(this.gameSpace.getWorld(), this.map, player);
+			}
+		});
+	}
+	
 	private boolean isFull() {
 		return this.gameSpace.getPlayerCount() >= this.config.getPlayerConfig().getMaxPlayers();
 	}
@@ -78,6 +89,6 @@ public class ColorSwapWaitingPhase {
 	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
 		ColorSwapActivePhase.spawn(this.gameSpace.getWorld(), this.map, player);
-		return ActionResult.SUCCESS;
+		return ActionResult.FAIL;
 	}
 }
