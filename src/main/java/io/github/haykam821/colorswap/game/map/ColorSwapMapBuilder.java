@@ -22,7 +22,7 @@ public class ColorSwapMapBuilder {
 		BlockPos origin = new BlockPos(0, 64, 0);
 		BlockBounds platform = new BlockBounds(
 				origin,
-				origin.add(mapConfig.x * mapConfig.tileSize - 1, 0, mapConfig.z * mapConfig.tileSize - 1)
+				origin.add(mapConfig.x * mapConfig.xScale - 1, 0, mapConfig.z * mapConfig.zScale - 1)
 		);
 
 		Random random = new Random();

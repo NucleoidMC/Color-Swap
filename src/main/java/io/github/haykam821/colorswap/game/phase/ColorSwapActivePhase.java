@@ -116,12 +116,12 @@ public class ColorSwapActivePhase {
 		return player.getY() < this.map.getPlatform().getMin().getY();
 	}
 
-	public void eraseTile(BlockPos.Mutable origin, int size, BlockStateProvider erasedStateProvider) {
+	public void eraseTile(BlockPos.Mutable origin, int xSize, int zSize, BlockStateProvider erasedStateProvider) {
 		boolean keep = this.world.getBlockState(origin).isOf(this.swapBlock);
 
 		BlockPos.Mutable pos = origin.mutableCopy();
-		for (int x = origin.getX(); x < origin.getX() + size; x++) {
-			for (int z = origin.getZ(); z < origin.getZ() + size; z++) {
+		for (int x = origin.getX(); x < origin.getX() + xSize; x++) {
+			for (int z = origin.getZ(); z < origin.getZ() + zSize; z++) {
 				pos.set(x, origin.getY(), z);
 
 				if (!keep) {
@@ -143,10 +143,10 @@ public class ColorSwapActivePhase {
 		}
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
-		for (int x = 0; x < mapConfig.x * mapConfig.tileSize; x += mapConfig.tileSize) {
-			for (int z = 0; z < mapConfig.z * mapConfig.tileSize; z += mapConfig.tileSize) {
+		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += mapConfig.xScale) {
+			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += mapConfig.zScale) {
 				pos.set(x, 64, z);
-				this.eraseTile(pos, mapConfig.tileSize, mapConfig.erasedStateProvider);
+				this.eraseTile(pos, mapConfig.xScale, mapConfig.zScale, mapConfig.erasedStateProvider);
 			}
 		}
 	}
@@ -160,10 +160,10 @@ public class ColorSwapActivePhase {
 		return this.lastSwapBlocks.get(this.world.getRandom().nextInt(this.lastSwapBlocks.size()));
 	}
 
-	public void placeTile(BlockPos.Mutable origin, int size, BlockState state) {
+	public void placeTile(BlockPos.Mutable origin, int xSize, int zSize, BlockState state) {
 		BlockPos.Mutable pos = origin.mutableCopy();
-		for (int x = origin.getX(); x < origin.getX() + size; x++) {
-			for (int z = origin.getZ(); z < origin.getZ() + size; z++) {
+		for (int x = origin.getX(); x < origin.getX() + xSize; x++) {
+			for (int z = origin.getZ(); z < origin.getZ() + zSize; z++) {
 				pos.set(x, origin.getY(), z);
 
 				BlockState oldState = this.world.getBlockState(pos);
@@ -178,8 +178,8 @@ public class ColorSwapActivePhase {
 		this.lastSwapBlocks.clear();
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
-		for (int x = 0; x < mapConfig.x * mapConfig.tileSize; x += mapConfig.tileSize) {
-			for (int z = 0; z < mapConfig.z * mapConfig.tileSize; z += mapConfig.tileSize) {
+		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += mapConfig.xScale) {
+			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += mapConfig.zScale) {
 				pos.set(x, 64, z);
 
 				Block block = this.getPlatformBlock();
@@ -187,7 +187,7 @@ public class ColorSwapActivePhase {
 					this.lastSwapBlocks.add(block);
 				}
 
-				this.placeTile(pos, mapConfig.tileSize, block.getDefaultState());
+				this.placeTile(pos, mapConfig.xScale, mapConfig.zScale, block.getDefaultState());
 			}
 		}
 	}
