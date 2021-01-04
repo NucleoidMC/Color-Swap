@@ -116,6 +116,10 @@ public class ColorSwapActivePhase {
 		return player.getY() < this.map.getPlatform().getMin().getY();
 	}
 
+	public boolean isAbovePlatform(PlayerEntity player) {
+		return player.getY() > this.map.getPlatform().getMin().getY() + 2.5;
+	}
+
 	public void eraseTile(BlockPos.Mutable origin, int xSize, int zSize, BlockStateProvider erasedStateProvider) {
 		boolean keep = this.world.getBlockState(origin).isOf(this.swapBlock);
 
@@ -215,7 +219,7 @@ public class ColorSwapActivePhase {
 		while (iterator.hasNext()) {
 			PlayerRef playerRef = iterator.next();
 			playerRef.ifOnline(this.world, player -> {
-				if (this.isBelowPlatform(player)) {
+				if (this.isBelowPlatform(player) || this.isAbovePlatform(player)) {
 					this.eliminate(player, false);
 					iterator.remove();
 				}
