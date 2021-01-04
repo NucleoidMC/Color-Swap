@@ -1,5 +1,7 @@
 package io.github.haykam821.colorswap.game.map;
 
+import java.util.Random;
+
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import net.minecraft.util.math.BlockPos;
 import xyz.nucleoid.plasmid.map.template.MapTemplate;
@@ -23,8 +25,9 @@ public class ColorSwapMapBuilder {
 				origin.add(mapConfig.x * mapConfig.tileSize - 1, 0, mapConfig.z * mapConfig.tileSize - 1)
 		);
 
+		Random random = new Random();
 		for (BlockPos pos : platform) {
-			template.setBlockState(pos, this.config.getMapConfig().defaultState);
+			template.setBlockState(pos, this.config.getMapConfig().initialStateProvider.getBlockState(random, pos));
 		}
 
 		return new ColorSwapMap(template, platform);

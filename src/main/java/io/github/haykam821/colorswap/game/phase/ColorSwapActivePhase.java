@@ -21,6 +21,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.gen.stateprovider.BlockStateProvider;
 import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameCloseListener;
@@ -112,7 +113,7 @@ public class ColorSwapActivePhase {
 		return player.getY() < this.map.getPlatform().getMin().getY();
 	}
 
-	public void eraseTile(BlockPos.Mutable origin, int size, BlockState emptyState) {
+	public void eraseTile(BlockPos.Mutable origin, int size, BlockStateProvider erasedStateProvider) {
 		boolean keep = this.world.getBlockState(origin).isOf(this.swapBlock);
 
 		BlockPos.Mutable pos = origin.mutableCopy();
@@ -122,8 +123,10 @@ public class ColorSwapActivePhase {
 
 				if (!keep) {
 					BlockState oldState = this.world.getBlockState(pos);
-					this.world.getWorldChunk(pos).setBlockState(pos, emptyState, false);
-					this.world.updateListeners(pos, oldState, emptyState, 0);
+					BlockState newState = erasedStateProvider.getBlockState(this.world.getRandom(), pos);
+
+					this.world.getWorldChunk(pos).setBlockState(pos, newState, false);
+					this.world.updateListeners(pos, oldState, newState, 0);
 				}
 			}
 		}
@@ -140,7 +143,7 @@ public class ColorSwapActivePhase {
 		for (int x = 0; x < mapConfig.x * mapConfig.tileSize; x += mapConfig.tileSize) {
 			for (int z = 0; z < mapConfig.z * mapConfig.tileSize; z += mapConfig.tileSize) {
 				pos.set(x, 64, z);
-				this.eraseTile(pos, mapConfig.tileSize, mapConfig.emptyState);
+				this.eraseTile(pos, mapConfig.tileSize, mapConfig.erasedStateProvider);
 			}
 		}
 	}
