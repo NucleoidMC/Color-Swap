@@ -1,0 +1,15 @@
+{
+	"type": "colorswap:color_swap",
+	"name": "Knockback Color Swap",
+	"no_knockback_rounds": 2,
+	"map": {
+		"x": 12,
+		"z": 12,
+		"platformBlocks": "colorswap:platform_blocks"
+	},
+	"players": {
+		"min": 1,
+		"max": 32,
+		"threshold": 2
+	}
+}

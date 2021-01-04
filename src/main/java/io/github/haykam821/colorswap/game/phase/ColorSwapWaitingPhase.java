@@ -20,6 +20,8 @@ import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.event.RequestStartListener;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
+import xyz.nucleoid.plasmid.game.rule.GameRule;
+import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
 public class ColorSwapWaitingPhase {
 	private final GameSpace gameSpace;
@@ -45,6 +47,7 @@ public class ColorSwapWaitingPhase {
 
 			GameWaitingLobby.applyTo(game, context.getConfig().getPlayerConfig());
 			ColorSwapActivePhase.setRules(game);
+			game.setRule(GameRule.PVP, RuleResult.DENY);
 
 			// Listeners
 			game.on(GameTickListener.EVENT, waiting::tick);

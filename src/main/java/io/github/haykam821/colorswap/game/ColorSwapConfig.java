@@ -14,7 +14,8 @@ public class ColorSwapConfig {
 			PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
 			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE).forGetter(ColorSwapConfig::getSwapSound),
 			Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
-			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime)
+			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime),
+			Codec.INT.optionalFieldOf("no_knockback_rounds", -1).forGetter(ColorSwapConfig::getNoKnockbackRounds)
 		).apply(instance, ColorSwapConfig::new);
 	});
 
@@ -23,13 +24,15 @@ public class ColorSwapConfig {
 	private final SoundEvent swapSound;
 	private final int swapTime;
 	private final int eraseTime;
+	private final int noKnockbackRounds;
 
-	public ColorSwapConfig(ColorSwapMapConfig mapConfig, PlayerConfig playerConfig, SoundEvent swapSound, int swapTime, int eraseTime) {
+	public ColorSwapConfig(ColorSwapMapConfig mapConfig, PlayerConfig playerConfig, SoundEvent swapSound, int swapTime, int eraseTime, int noKnockbackRounds) {
 		this.mapConfig = mapConfig;
 		this.playerConfig = playerConfig;
 		this.swapSound = swapSound;
 		this.swapTime = swapTime;
 		this.eraseTime = eraseTime;
+		this.noKnockbackRounds = noKnockbackRounds;
 	}
 
 	public ColorSwapMapConfig getMapConfig() {
@@ -50,5 +53,9 @@ public class ColorSwapConfig {
 
 	public int getEraseTime() {
 		return this.eraseTime;
+	}
+
+	public int getNoKnockbackRounds() {
+		return this.noKnockbackRounds;
 	}
 }

@@ -1,5 +1,11 @@
 package io.github.haykam821.colorswap.game.phase;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.ColorSwapTimerBar;
 import io.github.haykam821.colorswap.game.map.ColorSwapMap;
@@ -16,6 +22,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -28,17 +35,12 @@ import xyz.nucleoid.plasmid.game.event.GameCloseListener;
 import xyz.nucleoid.plasmid.game.event.GameOpenListener;
 import xyz.nucleoid.plasmid.game.event.GameTickListener;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
+import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.util.PlayerRef;
 import xyz.nucleoid.plasmid.widget.GlobalWidgets;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ColorSwapActivePhase {
 	private final ServerWorld world;
@@ -72,7 +74,7 @@ public class ColorSwapActivePhase {
 		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
 		game.setRule(GameRule.HUNGER, RuleResult.DENY);
 		game.setRule(GameRule.PORTALS, RuleResult.DENY);
-		game.setRule(GameRule.PVP, RuleResult.DENY);
+		game.setRule(GameRule.PVP, RuleResult.ALLOW);
 		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
 	}
 
@@ -89,6 +91,7 @@ public class ColorSwapActivePhase {
 			game.on(GameOpenListener.EVENT, active::open);
 			game.on(GameTickListener.EVENT, active::tick);
 			game.on(PlayerAddListener.EVENT, active::addPlayer);
+			game.on(PlayerDamageListener.EVENT, active::onPlayerDamage);
 			game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
 		});
 	}
@@ -239,6 +242,10 @@ public class ColorSwapActivePhase {
 		return this.rounds > 10 ? 20 : 20 * 2;
 	}
 
+	private Text getKnockbackEnabledText() {
+		return new TranslatableText("Knockback has been enabled!").formatted(Formatting.RED);
+	}
+
 	public void tick() {
 		this.ticksUntilSwap -= 1;
 		this.timerBar.tick(this);
@@ -251,6 +258,9 @@ public class ColorSwapActivePhase {
 
 				this.rounds += 1;
 				this.maxTicksUntilSwap = this.getSwapTime();
+				if (this.rounds - 1 == this.config.getNoKnockbackRounds()) {
+					this.gameSpace.getPlayers().sendMessage(this.getKnockbackEnabledText());
+				}
 			} else {
 				this.erase();
 				this.swapBlock = null;
@@ -294,6 +304,15 @@ public class ColorSwapActivePhase {
 		}
 	}
 
+	private boolean isKnockbackEnabled() {
+		if (this.config.getNoKnockbackRounds() < 0) return false;
+		return this.rounds - 1 >= this.config.getNoKnockbackRounds();
+	}
+
+	private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
+		return this.isKnockbackEnabled() ? ActionResult.SUCCESS : ActionResult.FAIL;
+	}
+
 	public void eliminate(PlayerEntity eliminatedPlayer, boolean remove) {
 		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
 
@@ -315,6 +334,8 @@ public class ColorSwapActivePhase {
 	public static void spawn(ServerWorld world, ColorSwapMap map, ServerPlayerEntity player) {
 		Vec3d center = map.getPlatform().getCenter();
 		player.teleport(world, center.getX(), center.getY() + 0.5, center.getZ(), 0, 0);
-		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 20 * 60 * 10, 0, true, false));
+
+		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
+		player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, Integer.MAX_VALUE, 127, true, false));
 	}
 }
