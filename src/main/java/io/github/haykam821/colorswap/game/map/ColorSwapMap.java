@@ -29,8 +29,8 @@ public final class ColorSwapMap {
 		return player.getY() < this.platform.getMin().getY();
 	}
 
-	public boolean isAbovePlatform(ServerPlayerEntity player) {
-		return player.getY() > this.platform.getMin().getY() + 2.5;
+	public boolean isAbovePlatform(ServerPlayerEntity player, boolean lenient) {
+		return player.getY() > this.platform.getMin().getY() + (lenient ? 5 : 2.5);
 	}
 
 	public ChunkGenerator createGenerator(MinecraftServer server) {

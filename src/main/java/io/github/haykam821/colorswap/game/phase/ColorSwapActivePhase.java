@@ -212,7 +212,7 @@ public class ColorSwapActivePhase {
 		while (iterator.hasNext()) {
 			PlayerRef playerRef = iterator.next();
 			playerRef.ifOnline(this.world, player -> {
-				if (this.map.isBelowPlatform(player) || this.map.isAbovePlatform(player)) {
+				if (this.map.isBelowPlatform(player) || this.map.isAbovePlatform(player, this.isKnockbackEnabled())) {
 					this.eliminate(player, false);
 					iterator.remove();
 				}
