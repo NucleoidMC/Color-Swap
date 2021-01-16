@@ -29,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.gen.stateprovider.BlockStateProvider;
+import xyz.nucleoid.plasmid.game.GameCloseReason;
 import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.event.GameCloseListener;
@@ -110,14 +111,6 @@ public class ColorSwapActivePhase {
 
 	public void close() {
 		this.timerBar.remove();
-	}
-
-	public boolean isBelowPlatform(PlayerEntity player) {
-		return player.getY() < this.map.getPlatform().getMin().getY();
-	}
-
-	public boolean isAbovePlatform(PlayerEntity player) {
-		return player.getY() > this.map.getPlatform().getMin().getY() + 2.5;
 	}
 
 	public void eraseTile(BlockPos.Mutable origin, int xSize, int zSize, BlockStateProvider erasedStateProvider) {
@@ -219,7 +212,7 @@ public class ColorSwapActivePhase {
 		while (iterator.hasNext()) {
 			PlayerRef playerRef = iterator.next();
 			playerRef.ifOnline(this.world, player -> {
-				if (this.isBelowPlatform(player) || this.isAbovePlatform(player)) {
+				if (this.map.isBelowPlatform(player) || this.map.isAbovePlatform(player)) {
 					this.eliminate(player, false);
 					iterator.remove();
 				}
@@ -281,7 +274,7 @@ public class ColorSwapActivePhase {
 
 			this.gameSpace.getPlayers().sendMessage(this.getEndingMessage());
 
-			this.gameSpace.close();
+			this.gameSpace.close(GameCloseReason.FINISHED);
 		}
 	}
 
@@ -336,8 +329,8 @@ public class ColorSwapActivePhase {
 	}
 
 	public static void spawn(ServerWorld world, ColorSwapMap map, ServerPlayerEntity player) {
-		Vec3d center = map.getPlatform().getCenter();
-		player.teleport(world, center.getX(), center.getY() + 0.5, center.getZ(), 0, 0);
+		Vec3d spawnPos = map.getSpawnPos();
+		player.teleport(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), 0, 0);
 
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, Integer.MAX_VALUE, 127, true, false));

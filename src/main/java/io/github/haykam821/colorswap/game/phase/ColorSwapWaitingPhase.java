@@ -59,12 +59,11 @@ public class ColorSwapWaitingPhase {
 	}
 
 	private void tick() {
-		int minY = this.map.getPlatform().getMin().getY();
-		this.gameSpace.getPlayers().forEach(player -> {
-			if (player.getY() < minY) {
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
+			if (this.map.isBelowPlatform(player)) {
 				ColorSwapActivePhase.spawn(this.gameSpace.getWorld(), this.map, player);
 			}
-		});
+		}
 	}
 	
 	private boolean isFull() {
