@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import io.github.haykam821.colorswap.Main;
-import net.fabricmc.fabric.api.tag.TagRegistry;
+import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.tag.Tag;
@@ -44,7 +44,7 @@ public class ColorSwapMapConfig {
 	}
 
 	public Tag<Block> getPlatformBlocks() {
-		Tag<Block> tag = TagRegistry.block(this.platformBlocks);
+		Tag<Block> tag = TagFactory.BLOCK.create(this.platformBlocks);
 		return tag == null ? Main.PLATFORM_BLOCKS : tag;
 	}
 }

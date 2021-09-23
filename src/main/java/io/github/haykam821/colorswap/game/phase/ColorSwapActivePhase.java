@@ -29,19 +29,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.gen.stateprovider.BlockStateProvider;
+import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameCloseReason;
-import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.event.GameCloseListener;
-import xyz.nucleoid.plasmid.game.event.GameOpenListener;
-import xyz.nucleoid.plasmid.game.event.GameTickListener;
-import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDamageListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
-import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.rule.GameRuleType;
 import xyz.nucleoid.plasmid.util.PlayerRef;
-import xyz.nucleoid.plasmid.widget.GlobalWidgets;
+import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
 public class ColorSwapActivePhase {
 	private final ServerWorld world;
@@ -59,8 +56,8 @@ public class ColorSwapActivePhase {
 
 	private boolean opened;
 
-	public ColorSwapActivePhase(GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players, GlobalWidgets widgets) {
-		this.world = gameSpace.getWorld();
+	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players, GlobalWidgets widgets) {
+		this.world = world;
 		this.gameSpace = gameSpace;
 		this.map = map;
 		this.config = config;
@@ -70,30 +67,30 @@ public class ColorSwapActivePhase {
 		this.maxTicksUntilSwap = this.getSwapTime();
 	}
 
-	public static void setRules(GameLogic game) {
-		game.setRule(GameRule.CRAFTING, RuleResult.DENY);
-		game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-		game.setRule(GameRule.HUNGER, RuleResult.DENY);
-		game.setRule(GameRule.PORTALS, RuleResult.DENY);
-		game.setRule(GameRule.PVP, RuleResult.ALLOW);
-		game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
+	public static void setRules(GameActivity activity) {
+		activity.deny(GameRuleType.CRAFTING);
+		activity.deny(GameRuleType.FALL_DAMAGE);
+		activity.deny(GameRuleType.HUNGER);
+		activity.deny(GameRuleType.PORTALS);
+		activity.allow(GameRuleType.PVP);
+		activity.deny(GameRuleType.THROW_ITEMS);
 	}
 
-	public static void open(GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config) {
-		gameSpace.openGame(game -> {
-			GlobalWidgets widgets = new GlobalWidgets(game);
+	public static void open(GameSpace gameSpace, ServerWorld world, ColorSwapMap map, ColorSwapConfig config) {
+		gameSpace.setActivity(activity -> {
+			GlobalWidgets widgets = GlobalWidgets.addTo(activity);
 			Set<PlayerRef> players = gameSpace.getPlayers().stream().map(PlayerRef::of).collect(Collectors.toSet());
-			ColorSwapActivePhase active = new ColorSwapActivePhase(gameSpace, map, config, players, widgets);
+			ColorSwapActivePhase active = new ColorSwapActivePhase(world, gameSpace, map, config, players, widgets);
 
-			ColorSwapActivePhase.setRules(game);
+			ColorSwapActivePhase.setRules(activity);
 
 			// Listeners
-			game.on(GameCloseListener.EVENT, active::close);
-			game.on(GameOpenListener.EVENT, active::open);
-			game.on(GameTickListener.EVENT, active::tick);
-			game.on(PlayerAddListener.EVENT, active::addPlayer);
-			game.on(PlayerDamageListener.EVENT, active::onPlayerDamage);
-			game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
+			activity.listen(GameActivityEvents.DISABLE, active::close);
+			activity.listen(GameActivityEvents.ENABLE, active::open);
+			activity.listen(GameActivityEvents.TICK, active::tick);
+			activity.listen(GamePlayerEvents.ADD, active::addPlayer);
+			activity.listen(PlayerDamageEvent.EVENT, active::onPlayerDamage);
+			activity.listen(PlayerDeathEvent.EVENT, active::onPlayerDeath);
 		});
 	}
 
@@ -101,7 +98,7 @@ public class ColorSwapActivePhase {
 		this.singleplayer = this.players.size() == 1;
 		for (PlayerRef playerRef : this.players) {
 			playerRef.ifOnline(this.world, player -> {
-				player.setGameMode(GameMode.ADVENTURE);
+				player.changeGameMode(GameMode.ADVENTURE);
 				ColorSwapActivePhase.spawn(this.world, this.map, player);
 			});
 		}
@@ -194,15 +191,14 @@ public class ColorSwapActivePhase {
 
 		for (PlayerRef playerRef : this.players) {
 			playerRef.ifOnline(this.world, player -> {
-				player.inventory.clear();
+				player.getInventory().clear();
 				for (int slot = 0; slot < 9; slot++) {
-					player.inventory.setStack(slot, stack.copy());
+					player.getInventory().setStack(slot, stack.copy());
 				}
 
 				// Update inventory
 				player.currentScreenHandler.sendContentUpdates();
-				player.playerScreenHandler.onContentChanged(player.inventory);
-				player.updateCursorStack();
+				player.playerScreenHandler.onContentChanged(player.getInventory());
 			});
 		}
 	}
@@ -289,8 +285,8 @@ public class ColorSwapActivePhase {
 		return new LiteralText("Nobody won the game!").formatted(Formatting.GOLD);
 	}
 
-	private void setSpectator(PlayerEntity player) {
-		player.setGameMode(GameMode.SPECTATOR);
+	private void setSpectator(ServerPlayerEntity player) {
+		player.changeGameMode(GameMode.SPECTATOR);
 	}
 
 	public void addPlayer(ServerPlayerEntity player) {
@@ -310,7 +306,7 @@ public class ColorSwapActivePhase {
 		return this.isKnockbackEnabled() ? ActionResult.SUCCESS : ActionResult.FAIL;
 	}
 
-	public void eliminate(PlayerEntity eliminatedPlayer, boolean remove) {
+	public void eliminate(ServerPlayerEntity eliminatedPlayer, boolean remove) {
 		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
 
 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
@@ -323,7 +319,7 @@ public class ColorSwapActivePhase {
 		this.setSpectator(eliminatedPlayer);
 	}
 
-	public ActionResult onPlayerDeath(PlayerEntity player, DamageSource source) {
+	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		this.eliminate(player, true);
 		return ActionResult.SUCCESS;
 	}

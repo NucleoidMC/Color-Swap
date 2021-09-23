@@ -1,6 +1,5 @@
 {
 	"type": "colorswap:color_swap",
-	"name": "Color Swap",
 	"map": {
 		"x": 12,
 		"z": 12,

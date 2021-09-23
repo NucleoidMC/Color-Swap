@@ -1,6 +1,5 @@
 {
 	"type": "colorswap:color_swap",
-	"name": "Knockback Color Swap",
 	"no_knockback_rounds": 2,
 	"map": {
 		"x": 12,

@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import xyz.nucleoid.plasmid.game.config.PlayerConfig;
+import xyz.nucleoid.plasmid.game.common.config.PlayerConfig;
 
 public class ColorSwapConfig {
 	public static final Codec<ColorSwapConfig> CODEC = RecordCodecBuilder.create(instance -> {

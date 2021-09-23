@@ -4,8 +4,8 @@ import java.util.Random;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import net.minecraft.util.math.BlockPos;
-import xyz.nucleoid.plasmid.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.util.BlockBounds;
+import xyz.nucleoid.map_templates.BlockBounds;
+import xyz.nucleoid.map_templates.MapTemplate;
 
 public class ColorSwapMapBuilder {
 	private final ColorSwapConfig config;
@@ -20,7 +20,7 @@ public class ColorSwapMapBuilder {
 		MapTemplate template = MapTemplate.createEmpty();
 
 		BlockPos origin = new BlockPos(0, 64, 0);
-		BlockBounds platform = new BlockBounds(
+		BlockBounds platform = BlockBounds.of(
 				origin,
 				origin.add(mapConfig.x * mapConfig.xScale - 1, 0, mapConfig.z * mapConfig.zScale - 1)
 		);
