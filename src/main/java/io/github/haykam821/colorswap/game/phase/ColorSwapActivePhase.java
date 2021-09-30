@@ -98,6 +98,7 @@ public class ColorSwapActivePhase {
 		this.singleplayer = this.players.size() == 1;
 		for (PlayerRef playerRef : this.players) {
 			playerRef.ifOnline(this.world, player -> {
+				this.updateRoundsExperienceLevel(player);
 				player.changeGameMode(GameMode.ADVENTURE);
 				ColorSwapActivePhase.spawn(this.world, this.map, player);
 			});
@@ -108,6 +109,17 @@ public class ColorSwapActivePhase {
 
 	public void close() {
 		this.timerBar.remove();
+	}
+
+	public void updateRoundsExperienceLevel(ServerPlayerEntity player) {
+		player.setExperienceLevel(this.rounds);
+	}
+
+	private void setRounds(int rounds) {
+		this.rounds = rounds;
+		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
+			this.updateRoundsExperienceLevel(player);
+		}
 	}
 
 	public void eraseTile(BlockPos.Mutable origin, int xSize, int zSize, BlockStateProvider erasedStateProvider) {
@@ -249,7 +261,7 @@ public class ColorSwapActivePhase {
 				this.swapBlock = this.getSwapBlock();
 				this.giveSwapBlocks();
 
-				this.rounds += 1;
+				this.setRounds(this.rounds + 1);
 				this.maxTicksUntilSwap = this.getSwapTime();
 				if (this.rounds - 1 == this.config.getNoKnockbackRounds()) {
 					this.gameSpace.getPlayers().sendMessage(this.getKnockbackEnabledText());
@@ -290,6 +302,8 @@ public class ColorSwapActivePhase {
 	}
 
 	public void addPlayer(ServerPlayerEntity player) {
+		this.updateRoundsExperienceLevel(player);
+
 		if (!this.players.contains(PlayerRef.of(player))) {
 			this.setSpectator(player);
 		} else if (this.opened) {
