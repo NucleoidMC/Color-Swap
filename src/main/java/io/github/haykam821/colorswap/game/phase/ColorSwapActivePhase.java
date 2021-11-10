@@ -35,6 +35,8 @@ import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
 import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.player.PlayerOffer;
+import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 import xyz.nucleoid.plasmid.game.rule.GameRuleType;
 import xyz.nucleoid.plasmid.util.PlayerRef;
 import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
@@ -53,8 +55,6 @@ public class ColorSwapActivePhase {
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar;
 	private int rounds = 0;
-
-	private boolean opened;
 
 	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players, GlobalWidgets widgets) {
 		this.world = world;
@@ -88,7 +88,8 @@ public class ColorSwapActivePhase {
 			activity.listen(GameActivityEvents.DISABLE, active::close);
 			activity.listen(GameActivityEvents.ENABLE, active::open);
 			activity.listen(GameActivityEvents.TICK, active::tick);
-			activity.listen(GamePlayerEvents.ADD, active::addPlayer);
+			activity.listen(GamePlayerEvents.OFFER, active::offerPlayer);
+			activity.listen(GamePlayerEvents.REMOVE, active::removePlayer);
 			activity.listen(PlayerDamageEvent.EVENT, active::onPlayerDamage);
 			activity.listen(PlayerDeathEvent.EVENT, active::onPlayerDeath);
 		});
@@ -103,8 +104,6 @@ public class ColorSwapActivePhase {
 				ColorSwapActivePhase.spawn(this.world, this.map, player);
 			});
 		}
-
-		this.opened = true;
 	}
 
 	public void close() {
@@ -301,14 +300,15 @@ public class ColorSwapActivePhase {
 		player.changeGameMode(GameMode.SPECTATOR);
 	}
 
-	public void addPlayer(ServerPlayerEntity player) {
-		this.updateRoundsExperienceLevel(player);
+	public PlayerOfferResult offerPlayer(PlayerOffer offer) {
+		return offer.accept(this.world, this.map.getSpawnPos()).and(() -> {
+			this.updateRoundsExperienceLevel(offer.player());
+			this.setSpectator(offer.player());
+		});
+	}
 
-		if (!this.players.contains(PlayerRef.of(player))) {
-			this.setSpectator(player);
-		} else if (this.opened) {
-			this.eliminate(player, true);
-		}
+	public void removePlayer(ServerPlayerEntity player) {
+		this.eliminate(player, true);
 	}
 
 	private boolean isKnockbackEnabled() {
