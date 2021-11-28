@@ -321,6 +321,9 @@ public class ColorSwapActivePhase {
 	}
 
 	public void eliminate(ServerPlayerEntity eliminatedPlayer, boolean remove) {
+		PlayerRef eliminatedRef = PlayerRef.of(eliminatedPlayer);
+		if (!this.players.contains(eliminatedRef)) return;
+
 		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
 
 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
@@ -328,7 +331,7 @@ public class ColorSwapActivePhase {
 		}
 
 		if (remove) {
-			this.players.remove(PlayerRef.of(eliminatedPlayer));
+			this.players.remove(eliminatedRef);
 		}
 		this.setSpectator(eliminatedPlayer);
 	}
