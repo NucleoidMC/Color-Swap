@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -290,10 +289,10 @@ public class ColorSwapActivePhase {
 			PlayerRef winnerRef = this.players.iterator().next();
 			PlayerEntity winner = winnerRef.getEntity(this.world);
 			if (winner != null) {
-				return winner.getDisplayName().shallowCopy().append(" has won the game!").formatted(Formatting.GOLD);
+				return new TranslatableText("text.colorswap.win", winner.getDisplayName()).formatted(Formatting.GOLD);
 			}
 		}
-		return new LiteralText("Nobody won the game!").formatted(Formatting.GOLD);
+		return new TranslatableText("text.colorswap.no_winners").formatted(Formatting.GOLD);
 	}
 
 	private void setSpectator(ServerPlayerEntity player) {
@@ -324,7 +323,7 @@ public class ColorSwapActivePhase {
 		PlayerRef eliminatedRef = PlayerRef.of(eliminatedPlayer);
 		if (!this.players.contains(eliminatedRef)) return;
 
-		Text message = eliminatedPlayer.getDisplayName().shallowCopy().append(" has been eliminated!").formatted(Formatting.RED);
+		Text message = new TranslatableText("text.colorswap.eliminated", eliminatedPlayer.getDisplayName()).formatted(Formatting.RED);
 
 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			player.sendMessage(message, false);

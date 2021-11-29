@@ -1,5 +1,8 @@
 {
 	"game.colorswap.knockback_color_swap": "Knockback Color Swap",
 	"game.colorswap.standard_color_swap": "Color Swap",
-	"gameType.colorswap.color_swap": "Color Swap"
+	"gameType.colorswap.color_swap": "Color Swap",
+	"text.colorswap.eliminated": "%s has been eliminated!",
+	"text.colorswap.no_winners": "Nobody won the game!",
+	"text.colorswap.win": "%s has won the game!"
 }

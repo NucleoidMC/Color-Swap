@@ -2,8 +2,8 @@ package io.github.haykam821.colorswap.game;
 
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import net.minecraft.entity.boss.BossBar;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
 import xyz.nucleoid.plasmid.game.common.widget.BossBarWidget;
@@ -40,7 +40,7 @@ public class ColorSwapTimerBar {
 	}
 
 	private Text getTitleWithColor(Formatting formatting) {
-		return new LiteralText("Color Swap").formatted(formatting);
+		return new TranslatableText("gameType.colorswap.color_swap").formatted(formatting);
 	}
 
 	static {
