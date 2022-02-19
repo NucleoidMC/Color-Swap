@@ -1,5 +1,6 @@
 {
 	"type": "colorswap:color_swap",
+	"icon": "minecraft:golden_axe",
 	"no_knockback_rounds": 2,
 	"map": {
 		"x": 12,

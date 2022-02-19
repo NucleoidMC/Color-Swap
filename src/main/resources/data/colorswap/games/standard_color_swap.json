@@ -1,5 +1,6 @@
 {
 	"type": "colorswap:color_swap",
+	"icon": "minecraft:golden_boots",
 	"map": {
 		"x": 12,
 		"z": 12,
