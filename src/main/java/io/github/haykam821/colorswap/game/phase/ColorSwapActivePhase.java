@@ -155,11 +155,6 @@ public class ColorSwapActivePhase {
 		}
 	}
 
-	private Block getPlatformBlock() {
-		ColorSwapMapConfig mapConfig = this.config.getMapConfig();
-		return mapConfig.getPlatformBlocks().getRandom(this.world.getRandom());
-	}
-
 	private Block getSwapBlock() {
 		return this.lastSwapBlocks.get(this.world.getRandom().nextInt(this.lastSwapBlocks.size()));
 	}
@@ -186,7 +181,7 @@ public class ColorSwapActivePhase {
 			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += mapConfig.zScale) {
 				pos.set(x, 64, z);
 
-				Block block = this.getPlatformBlock();
+				Block block = this.config.getMapConfig().getPlatformBlock(this.world.getRandom());
 				if (!this.lastSwapBlocks.contains(block)) {
 					this.lastSwapBlocks.add(block);
 				}

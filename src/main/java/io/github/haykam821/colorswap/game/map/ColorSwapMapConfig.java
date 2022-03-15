@@ -1,14 +1,17 @@
 package io.github.haykam821.colorswap.game.map;
 
+import java.util.Optional;
+import java.util.Random;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import io.github.haykam821.colorswap.Main;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.tag.Tag;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryCodecs;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.world.gen.stateprovider.BlockStateProvider;
 
 public class ColorSwapMapConfig {
@@ -20,7 +23,7 @@ public class ColorSwapMapConfig {
 				Codec.INT.optionalFieldOf("z_scale", 3).forGetter(config -> config.zScale),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("initial_state_provider", BlockStateProvider.of(Blocks.WHITE_WOOL)).forGetter(config -> config.initialStateProvider),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("erased_state_provider", BlockStateProvider.of(Blocks.AIR)).forGetter(config -> config.erasedStateProvider),
-				Identifier.CODEC.fieldOf("platformBlocks").forGetter(config -> config.platformBlocks)
+				RegistryCodecs.entryList(Registry.BLOCK_KEY).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
 		).apply(instance, ColorSwapMapConfig::new);
 	});
 
@@ -30,9 +33,9 @@ public class ColorSwapMapConfig {
 	public final int zScale;
 	public final BlockStateProvider initialStateProvider;
 	public final BlockStateProvider erasedStateProvider;
-	private final Identifier platformBlocks;
+	private final RegistryEntryList<Block> platformBlocks;
 
-	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, BlockStateProvider initialStateProvider, BlockStateProvider erasedStateProvider, Identifier platformBlocks) {
+	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, BlockStateProvider initialStateProvider, BlockStateProvider erasedStateProvider, RegistryEntryList<Block> platformBlocks) {
 		this.x = x;
 		this.z = z;
 		this.xScale = xScale;
@@ -42,8 +45,12 @@ public class ColorSwapMapConfig {
 		this.platformBlocks = platformBlocks;
 	}
 
-	public Tag<Block> getPlatformBlocks() {
-		Tag<Block> tag = TagFactory.BLOCK.create(this.platformBlocks);
-		return tag == null ? Main.PLATFORM_BLOCKS : tag;
+	public Block getPlatformBlock(Random random) {
+		Optional<RegistryEntry<Block>> maybeBlock = this.platformBlocks.getRandom(random);
+		if (maybeBlock.isEmpty()) {
+			throw new IllegalStateException("No platform block available from " + this.platformBlocks);
+		}
+
+		return maybeBlock.get().value();
 	}
 }
