@@ -241,7 +241,7 @@ public class ColorSwapActivePhase {
 	}
 
 	private Text getKnockbackEnabledText() {
-		return new TranslatableText("Knockback has been enabled!").formatted(Formatting.RED);
+		return new TranslatableText("text.colorswap.knockback_enabled").formatted(Formatting.RED);
 	}
 
 	public void tick() {
