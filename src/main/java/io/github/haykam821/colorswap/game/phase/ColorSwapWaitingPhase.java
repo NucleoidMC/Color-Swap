@@ -38,7 +38,7 @@ public class ColorSwapWaitingPhase {
 		ColorSwapConfig config = context.game().config();
 		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(config);
 
-		ColorSwapMap map = mapBuilder.create();
+		ColorSwapMap map = mapBuilder.create(context.server().getOverworld().getRandom());
 		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
 				.setGenerator(map.createGenerator(context.server()));
 

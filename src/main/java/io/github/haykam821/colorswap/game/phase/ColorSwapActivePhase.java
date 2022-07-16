@@ -21,7 +21,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -241,7 +240,7 @@ public class ColorSwapActivePhase {
 	}
 
 	private Text getKnockbackEnabledText() {
-		return new TranslatableText("text.colorswap.knockback_enabled").formatted(Formatting.RED);
+		return Text.translatable("text.colorswap.knockback_enabled").formatted(Formatting.RED);
 	}
 
 	public void tick() {
@@ -284,10 +283,10 @@ public class ColorSwapActivePhase {
 			PlayerRef winnerRef = this.players.iterator().next();
 			PlayerEntity winner = winnerRef.getEntity(this.world);
 			if (winner != null) {
-				return new TranslatableText("text.colorswap.win", winner.getDisplayName()).formatted(Formatting.GOLD);
+				return Text.translatable("text.colorswap.win", winner.getDisplayName()).formatted(Formatting.GOLD);
 			}
 		}
-		return new TranslatableText("text.colorswap.no_winners").formatted(Formatting.GOLD);
+		return Text.translatable("text.colorswap.no_winners").formatted(Formatting.GOLD);
 	}
 
 	private void setSpectator(ServerPlayerEntity player) {
@@ -318,7 +317,7 @@ public class ColorSwapActivePhase {
 		PlayerRef eliminatedRef = PlayerRef.of(eliminatedPlayer);
 		if (!this.players.contains(eliminatedRef)) return;
 
-		Text message = new TranslatableText("text.colorswap.eliminated", eliminatedPlayer.getDisplayName()).formatted(Formatting.RED);
+		Text message = Text.translatable("text.colorswap.eliminated", eliminatedPlayer.getDisplayName()).formatted(Formatting.RED);
 
 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			player.sendMessage(message, false);
