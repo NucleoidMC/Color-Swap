@@ -7,6 +7,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
@@ -51,7 +52,6 @@ public class ColorSwapWaitingPhase {
 
 			// Listeners
 			game.listen(GameActivityEvents.TICK, waiting::tick);
-			game.listen(GamePlayerEvents.ADD, waiting::addPlayer);
 			game.listen(PlayerDeathEvent.EVENT, waiting::onPlayerDeath);
 			game.listen(GamePlayerEvents.OFFER, waiting::offerPlayer);
 			game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
@@ -61,13 +61,13 @@ public class ColorSwapWaitingPhase {
 	private void tick() {
 		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
 			if (this.map.isBelowPlatform(player)) {
-				ColorSwapActivePhase.spawn(this.world, this.map, player);
+				this.spawn(player);
 			}
 		}
 	}
 
 	private PlayerOfferResult offerPlayer(PlayerOffer offer) {
-		return offer.accept(this.world, this.map.getSpawnPos())
+		return offer.accept(this.world, this.map.getCenter())
 			.and(() -> offer.player().changeGameMode(GameMode.ADVENTURE));
 	}
 
@@ -76,13 +76,14 @@ public class ColorSwapWaitingPhase {
 		return GameResult.ok();
 	}
 
-	public void addPlayer(ServerPlayerEntity player) {
-		ColorSwapActivePhase.spawn(this.world, this.map, player);
-	}
-
 	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		// Respawn player at the start
-		ColorSwapActivePhase.spawn(this.world, this.map, player);
+		this.spawn(player);
 		return ActionResult.FAIL;
+	}
+
+	private void spawn(ServerPlayerEntity player) {
+		Vec3d spawnPos = map.getCenter();
+		ColorSwapActivePhase.spawn(this.world, spawnPos, 0, player);
 	}
 }

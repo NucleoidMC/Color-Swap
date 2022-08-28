@@ -1,9 +1,9 @@
 package io.github.haykam821.colorswap.game.phase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
@@ -46,7 +46,7 @@ public class ColorSwapActivePhase {
 	private final GameSpace gameSpace;
 	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
-	private final Set<PlayerRef> players;
+	private final List<PlayerRef> players;
 	private int maxTicksUntilSwap;
 	private int ticksUntilSwap = 0;
 	private List<Block> lastSwapBlocks = new ArrayList<>();
@@ -55,7 +55,7 @@ public class ColorSwapActivePhase {
 	private final ColorSwapTimerBar timerBar;
 	private int rounds = 0;
 
-	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, Set<PlayerRef> players, GlobalWidgets widgets) {
+	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, List<PlayerRef> players, GlobalWidgets widgets) {
 		this.world = world;
 		this.gameSpace = gameSpace;
 		this.map = map;
@@ -78,14 +78,17 @@ public class ColorSwapActivePhase {
 	public static void open(GameSpace gameSpace, ServerWorld world, ColorSwapMap map, ColorSwapConfig config) {
 		gameSpace.setActivity(activity -> {
 			GlobalWidgets widgets = GlobalWidgets.addTo(activity);
-			Set<PlayerRef> players = gameSpace.getPlayers().stream().map(PlayerRef::of).collect(Collectors.toSet());
+
+			List<PlayerRef> players = gameSpace.getPlayers().stream().map(PlayerRef::of).collect(Collectors.toList());
+			Collections.shuffle(players);
+
 			ColorSwapActivePhase active = new ColorSwapActivePhase(world, gameSpace, map, config, players, widgets);
 
 			ColorSwapActivePhase.setRules(activity);
 
 			// Listeners
 			activity.listen(GameActivityEvents.DISABLE, active::close);
-			activity.listen(GameActivityEvents.ENABLE, active::open);
+			activity.listen(GameActivityEvents.ENABLE, active::enable);
 			activity.listen(GameActivityEvents.TICK, active::tick);
 			activity.listen(GamePlayerEvents.OFFER, active::offerPlayer);
 			activity.listen(GamePlayerEvents.REMOVE, active::removePlayer);
@@ -94,14 +97,29 @@ public class ColorSwapActivePhase {
 		});
 	}
 
-	public void open() {
+	public void enable() {
+		int index = 0;
 		this.singleplayer = this.players.size() == 1;
+
+		Vec3d center = this.map.getCenter();
+		double spawnRadius = this.map.getSpawnRadius();
+
 		for (PlayerRef playerRef : this.players) {
-			playerRef.ifOnline(this.world, player -> {
+			ServerPlayerEntity player = playerRef.getEntity(this.world);
+
+			if (player != null) {
 				this.updateRoundsExperienceLevel(player);
 				player.changeGameMode(GameMode.ADVENTURE);
-				ColorSwapActivePhase.spawn(this.world, this.map, player);
-			});
+
+				double theta = ((double) index / this.players.size()) * 2 * Math.PI;
+				double x = center.getX() + Math.sin(theta) * spawnRadius;
+				double z = center.getZ() + Math.cos(theta) * spawnRadius;
+
+				Vec3d spawnPos = new Vec3d(x, center.getY(), z);
+				ColorSwapActivePhase.spawn(this.world, spawnPos, (float) theta - 180, player);
+			}
+
+			index++;
 		}
 	}
 
@@ -295,7 +313,7 @@ public class ColorSwapActivePhase {
 	}
 
 	public PlayerOfferResult offerPlayer(PlayerOffer offer) {
-		return offer.accept(this.world, this.map.getSpawnPos()).and(() -> {
+		return offer.accept(this.world, this.map.getCenter()).and(() -> {
 			this.updateRoundsExperienceLevel(offer.player());
 			this.setSpectator(offer.player());
 		});
@@ -335,9 +353,8 @@ public class ColorSwapActivePhase {
 		return ActionResult.SUCCESS;
 	}
 
-	public static void spawn(ServerWorld world, ColorSwapMap map, ServerPlayerEntity player) {
-		Vec3d spawnPos = map.getSpawnPos();
-		player.teleport(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), 0, 0);
+	public static void spawn(ServerWorld world, Vec3d spawnPos, float yaw, ServerPlayerEntity player) {
+		player.teleport(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), yaw, 0);
 
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, Integer.MAX_VALUE, 127, true, false));
