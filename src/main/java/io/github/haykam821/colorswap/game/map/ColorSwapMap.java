@@ -29,6 +29,10 @@ public final class ColorSwapMap {
 		this.spawnRadius = min > spawnRadiusPadding ? min / 2d - spawnRadiusPadding : 0;
 	}
 
+	public BlockBounds getPlatform() {
+		return this.platform;
+	}
+
 	public Vec3d getCenter() {
 		return this.center;
 	}
