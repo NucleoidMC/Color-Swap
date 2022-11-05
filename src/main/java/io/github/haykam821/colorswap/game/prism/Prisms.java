@@ -18,5 +18,6 @@ public final class Prisms {
 
 	public static void register() {
 		Prisms.register("leap", new LeapPrism());
+		Prisms.register("warp", new WarpPrism());
 	}
 }
