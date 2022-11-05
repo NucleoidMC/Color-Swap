@@ -19,12 +19,14 @@ public class LeapPrism extends Prism {
 	private static final double STEALTHY_LEAP_MIN_Y = 0;
 
 	@Override
-	public void activate(ColorSwapActivePhase phase, ServerPlayerEntity player) {
+	public boolean activate(ColorSwapActivePhase phase, ServerPlayerEntity player) {
 		Vec3d velocity = LeapPrism.getLeapVelocity(player);
 		Packet<?> packet = new ExplosionS2CPacket(0, 0, 0, 0, Collections.emptyList(), velocity);
 
 		player.networkHandler.sendPacket(packet);
 		phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.PLAYERS, 0.3f, 1.1f);
+
+		return true;
 	}
 
 	@Override

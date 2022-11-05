@@ -15,7 +15,7 @@ import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 public abstract class Prism {
 	private Text name;
 
-	public abstract void activate(ColorSwapActivePhase phase, ServerPlayerEntity player);
+	public abstract boolean activate(ColorSwapActivePhase phase, ServerPlayerEntity player);
 
 	public abstract Item getDisplayItem();
 

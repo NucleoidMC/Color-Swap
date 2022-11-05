@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class WarpPrism extends Prism {
 	@Override
-	public void activate(ColorSwapActivePhase phase, ServerPlayerEntity player) {
+	public boolean activate(ColorSwapActivePhase phase, ServerPlayerEntity player) {
 		Vec3d pos;
 
 		HitResult hit = player.raycast(32, 0, false);
@@ -24,8 +24,12 @@ public class WarpPrism extends Prism {
 			pos = hit.getPos();
 		}
 
-		player.teleport(pos.getX(), pos.getY(), pos.getZ(), true);
-		phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 0.3f, 1);
+		if (player.teleport(pos.getX(), pos.getY(), pos.getZ(), true)) {
+			phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 0.3f, 1);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override

@@ -185,16 +185,29 @@ public class ColorSwapActivePhase {
 		}
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
-		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += mapConfig.xScale) {
-			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += mapConfig.zScale) {
+
+		// Iterate over blocks when necessary to avoid conflicts with the splash prism
+		int xScale = this.prismSpawner == null ? mapConfig.xScale : 1;
+		int zScale = this.prismSpawner == null ? mapConfig.zScale : 1;
+
+		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += xScale) {
+			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += zScale) {
 				pos.set(x, 64, z);
-				this.eraseTile(pos, mapConfig.xScale, mapConfig.zScale, mapConfig.erasedStateProvider);
+				this.eraseTile(pos, xScale, zScale, mapConfig.erasedStateProvider);
 			}
 		}
 	}
 
 	private Block getSwapBlock() {
 		return this.lastSwapBlocks.get(this.world.getRandom().nextInt(this.lastSwapBlocks.size()));
+	}
+
+	public Block getCurrentSwapBlock() {
+		return this.swapBlock;
+	}
+
+	public boolean hasLastErased() {
+		return this.lastErased;
 	}
 
 	public void placeTile(BlockPos.Mutable origin, int xSize, int zSize, BlockState state) {
@@ -401,9 +414,7 @@ public class ColorSwapActivePhase {
 		if (this.players.contains(ref) && stack.isOf(Main.PRISM)) {
 			Prism prism = PrismItem.getPrism(stack);
 
-			if (prism != null) {
-				prism.activate(this, player);
-
+			if (prism != null && prism.activate(this, player)) {
 				ItemStack newStack = new ItemStack(this.swapBlock);
 				player.setStackInHand(hand, newStack);
 
