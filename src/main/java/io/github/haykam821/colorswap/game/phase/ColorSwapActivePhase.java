@@ -6,16 +6,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.github.haykam821.colorswap.Main;
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.ColorSwapTimerBar;
+import io.github.haykam821.colorswap.game.item.PrismItem;
 import io.github.haykam821.colorswap.game.map.ColorSwapMap;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
+import io.github.haykam821.colorswap.game.prism.Prism;
+import io.github.haykam821.colorswap.game.prism.spawner.PrismSpawner;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -24,6 +29,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -39,6 +46,7 @@ import xyz.nucleoid.plasmid.game.player.PlayerOffer;
 import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 import xyz.nucleoid.plasmid.game.rule.GameRuleType;
 import xyz.nucleoid.plasmid.util.PlayerRef;
+import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
 import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
 import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
@@ -52,8 +60,10 @@ public class ColorSwapActivePhase {
 	private int ticksUntilSwap = 0;
 	private List<Block> lastSwapBlocks = new ArrayList<>();
 	private Block swapBlock;
+	private boolean lastErased = true;
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar;
+	private final PrismSpawner prismSpawner;
 	private int rounds = 0;
 
 	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, List<PlayerRef> players, GlobalWidgets widgets) {
@@ -65,6 +75,10 @@ public class ColorSwapActivePhase {
 
 		this.timerBar = new ColorSwapTimerBar(widgets);
 		this.maxTicksUntilSwap = this.getSwapTime();
+
+		this.prismSpawner = this.config.getPrismConfig().map(prismConfig -> {
+			return new PrismSpawner(this, prismConfig, this.world.getRandom());
+		}).orElse(null);
 	}
 
 	public static void setRules(GameActivity activity) {
@@ -74,6 +88,8 @@ public class ColorSwapActivePhase {
 		activity.deny(GameRuleType.PORTALS);
 		activity.allow(GameRuleType.PVP);
 		activity.deny(GameRuleType.THROW_ITEMS);
+		activity.deny(GameRuleType.MODIFY_ARMOR);
+		activity.deny(GameRuleType.MODIFY_INVENTORY);
 	}
 
 	public static void open(GameSpace gameSpace, ServerWorld world, ColorSwapMap map, ColorSwapConfig config) {
@@ -95,6 +111,7 @@ public class ColorSwapActivePhase {
 			activity.listen(GamePlayerEvents.REMOVE, active::removePlayer);
 			activity.listen(PlayerDamageEvent.EVENT, active::onPlayerDamage);
 			activity.listen(PlayerDeathEvent.EVENT, active::onPlayerDeath);
+			activity.listen(ItemUseEvent.EVENT, active::onUseItem);
 		});
 	}
 
@@ -168,16 +185,29 @@ public class ColorSwapActivePhase {
 		}
 
 		BlockPos.Mutable pos = new BlockPos.Mutable();
-		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += mapConfig.xScale) {
-			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += mapConfig.zScale) {
+
+		// Iterate over blocks when necessary to avoid conflicts with the splash prism
+		int xScale = this.prismSpawner == null ? mapConfig.xScale : 1;
+		int zScale = this.prismSpawner == null ? mapConfig.zScale : 1;
+
+		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += xScale) {
+			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += zScale) {
 				pos.set(x, 64, z);
-				this.eraseTile(pos, mapConfig.xScale, mapConfig.zScale, mapConfig.erasedStateProvider);
+				this.eraseTile(pos, xScale, zScale, mapConfig.erasedStateProvider);
 			}
 		}
 	}
 
 	private Block getSwapBlock() {
 		return this.lastSwapBlocks.get(this.world.getRandom().nextInt(this.lastSwapBlocks.size()));
+	}
+
+	public Block getCurrentSwapBlock() {
+		return this.swapBlock;
+	}
+
+	public boolean hasLastErased() {
+		return this.lastErased;
 	}
 
 	public void placeTile(BlockPos.Mutable origin, int xSize, int zSize, BlockState state) {
@@ -217,14 +247,17 @@ public class ColorSwapActivePhase {
 
 		for (PlayerRef playerRef : this.players) {
 			playerRef.ifOnline(this.world, player -> {
-				player.getInventory().clear();
+				PlayerInventory inventory = player.getInventory();
+
 				for (int slot = 0; slot < 9; slot++) {
-					player.getInventory().setStack(slot, stack.copy());
+					if (!inventory.getStack(slot).isOf(Main.PRISM)) {
+						inventory.setStack(slot, stack.copy());
+					}
 				}
 
 				// Update inventory
 				player.currentScreenHandler.sendContentUpdates();
-				player.playerScreenHandler.onContentChanged(player.getInventory());
+				player.playerScreenHandler.onContentChanged(inventory);
 			});
 		}
 	}
@@ -234,7 +267,7 @@ public class ColorSwapActivePhase {
 		while (iterator.hasNext()) {
 			PlayerRef playerRef = iterator.next();
 			playerRef.ifOnline(this.world, player -> {
-				if (this.map.isBelowPlatform(player) || this.map.isAbovePlatform(player, this.isKnockbackEnabled())) {
+				if (this.map.isBelowPlatform(player) || (this.prismSpawner == null && this.map.isAbovePlatform(player, this.isKnockbackEnabled()))) {
 					this.eliminate(player, false);
 					iterator.remove();
 				}
@@ -269,24 +302,33 @@ public class ColorSwapActivePhase {
 		this.ticksUntilSwap -= 1;
 		this.timerBar.tick(this);
 		if (this.ticksUntilSwap <= 0) {
-			if (this.swapBlock == null) {
+			if (this.lastErased) {
 				this.swap();
 
 				this.swapBlock = this.getSwapBlock();
+				this.lastErased = false;
 				this.giveSwapBlocks();
 
 				this.setRounds(this.rounds + 1);
 				this.maxTicksUntilSwap = this.getSwapTime();
 				if (this.rounds - 1 == this.config.getNoKnockbackRounds()) {
-					this.gameSpace.getPlayers().sendMessage(this.getKnockbackEnabledText());
+					this.sendMessage(this.getKnockbackEnabledText());
+				}
+
+				if (this.prismSpawner != null) {
+					this.prismSpawner.onRoundEnd();
 				}
 			} else {
 				this.erase();
-				this.swapBlock = null;
+				this.lastErased = true;
 
 				this.maxTicksUntilSwap = this.getEraseTime();
 			}
 			this.ticksUntilSwap = this.maxTicksUntilSwap;
+		}
+
+		if (this.prismSpawner != null) {
+			this.prismSpawner.tick();
 		}
 
 		this.checkElimination();
@@ -294,7 +336,7 @@ public class ColorSwapActivePhase {
 		if (this.players.size() < 2) {
 			if (this.players.size() == 1 && this.singleplayer) return;
 
-			this.gameSpace.getPlayers().sendMessage(this.getEndingMessage());
+			this.sendMessage(this.getEndingMessage());
 
 			this.gameSpace.close(GameCloseReason.FINISHED);
 		}
@@ -311,6 +353,10 @@ public class ColorSwapActivePhase {
 		return new TranslatableText("text.colorswap.no_winners").formatted(Formatting.GOLD);
 	}
 
+	public void sendMessage(Text message) {
+		this.gameSpace.getPlayers().sendMessage(message);
+	}
+
 	private void setSpectator(ServerPlayerEntity player) {
 		player.changeGameMode(GameMode.SPECTATOR);
 	}
@@ -319,11 +365,19 @@ public class ColorSwapActivePhase {
 		return offer.accept(this.world, this.map.getCenter()).and(() -> {
 			this.updateRoundsExperienceLevel(offer.player());
 			this.setSpectator(offer.player());
+
+			if (this.prismSpawner != null) {
+				this.prismSpawner.addPlayer(offer.player());
+			}
 		});
 	}
 
 	public void removePlayer(ServerPlayerEntity player) {
 		this.eliminate(player, true);
+
+		if (this.prismSpawner != null) {
+			this.prismSpawner.removePlayer(player);
+		}
 	}
 
 	private boolean isKnockbackEnabled() {
@@ -340,10 +394,7 @@ public class ColorSwapActivePhase {
 		if (!this.players.contains(eliminatedRef)) return;
 
 		Text message = new TranslatableText("text.colorswap.eliminated", eliminatedPlayer.getDisplayName()).formatted(Formatting.RED);
-
-		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
-			player.sendMessage(message, false);
-		}
+		this.sendMessage(message);
 
 		if (remove) {
 			this.players.remove(eliminatedRef);
@@ -356,10 +407,40 @@ public class ColorSwapActivePhase {
 		return ActionResult.SUCCESS;
 	}
 
+	public TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
+		ItemStack stack = player.getStackInHand(hand);
+
+		PlayerRef ref = PlayerRef.of(player);
+		if (this.players.contains(ref) && stack.isOf(Main.PRISM)) {
+			Prism prism = PrismItem.getPrism(stack);
+
+			if (prism != null && prism.activate(this, player)) {
+				ItemStack newStack = new ItemStack(this.swapBlock);
+				player.setStackInHand(hand, newStack);
+
+				return TypedActionResult.success(newStack);
+			}
+		}
+
+		return TypedActionResult.pass(stack);
+	}
+
 	public static void spawn(ServerWorld world, Vec3d spawnPos, float yaw, ServerPlayerEntity player) {
 		player.teleport(world, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ(), yaw, 0);
 
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
 		player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, Integer.MAX_VALUE, 127, true, false));
+	}
+
+	public ColorSwapMap getMap() {
+		return this.map;
+	}
+
+	public ServerWorld getWorld() {
+		return this.world;
+	}
+
+	public List<PlayerRef> getPlayers() {
+		return this.players;
 	}
 }

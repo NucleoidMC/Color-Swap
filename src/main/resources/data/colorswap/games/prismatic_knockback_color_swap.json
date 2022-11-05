@@ -1,0 +1,16 @@
+{
+	"type": "colorswap:color_swap",
+	"icon": "minecraft:diamond_axe",
+	"no_knockback_rounds": 2,
+	"prisms": {},
+	"map": {
+		"x": 12,
+		"z": 12,
+		"platform_blocks": "#colorswap:platform_blocks"
+	},
+	"players": {
+		"min": 1,
+		"max": 32,
+		"threshold": 2
+	}
+}
