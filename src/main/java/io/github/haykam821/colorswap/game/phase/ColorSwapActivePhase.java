@@ -60,7 +60,7 @@ public class ColorSwapActivePhase {
 	private int ticksUntilSwap = 0;
 	private List<Block> lastSwapBlocks = new ArrayList<>();
 	private Block swapBlock;
-	private boolean lastErased;
+	private boolean lastErased = true;
 	private boolean singleplayer;
 	private final ColorSwapTimerBar timerBar;
 	private final PrismSpawner prismSpawner;
@@ -254,7 +254,7 @@ public class ColorSwapActivePhase {
 		while (iterator.hasNext()) {
 			PlayerRef playerRef = iterator.next();
 			playerRef.ifOnline(this.world, player -> {
-				if (this.map.isBelowPlatform(player) || this.map.isAbovePlatform(player, this.isKnockbackEnabled())) {
+				if (this.map.isBelowPlatform(player) || (this.prismSpawner == null && this.map.isAbovePlatform(player, this.isKnockbackEnabled()))) {
 					this.eliminate(player, false);
 					iterator.remove();
 				}
