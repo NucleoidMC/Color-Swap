@@ -1,9 +1,17 @@
 {
 	"game.colorswap.knockback_color_swap": "Knockback Color Swap",
+	"game.colorswap.prismatic_color_swap": "Prismatic Color Swap",
+	"game.colorswap.prismatic_knockback_color_swap": "Prismatic Knockback Color Swap",
 	"game.colorswap.standard_color_swap": "Color Swap",
 	"gameType.colorswap.color_swap": "Color Swap",
+	"item.colorswap.prism": "Prism",
+	"prism.colorswap.leap": "Leap",
+	"prism.colorswap.splash": "Splash",
+	"prism.colorswap.warp": "Warp",
 	"text.colorswap.eliminated": "%s has been eliminated!",
 	"text.colorswap.knockback_enabled": "Knockback has been enabled!",
 	"text.colorswap.no_winners": "Nobody won the game!",
+	"text.colorswap.prism.picked_up": "%s picked up the prism!",
+	"text.colorswap.prism.spawned": "A prism has spawned!",
 	"text.colorswap.win": "%s has won the game!"
 }

@@ -21,6 +21,7 @@ public class ColorSwapMapConfig {
 				Codec.INT.fieldOf("z").forGetter(config -> config.z),
 				Codec.INT.optionalFieldOf("x_scale", 3).forGetter(config -> config.xScale),
 				Codec.INT.optionalFieldOf("z_scale", 3).forGetter(config -> config.zScale),
+				Codec.DOUBLE.optionalFieldOf("spawn_radius_padding", 4d).forGetter(config -> config.spawnRadiusPadding),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("initial_state_provider", BlockStateProvider.of(Blocks.WHITE_WOOL)).forGetter(config -> config.initialStateProvider),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("erased_state_provider", BlockStateProvider.of(Blocks.AIR)).forGetter(config -> config.erasedStateProvider),
 				RegistryCodecs.entryList(Registry.BLOCK_KEY).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
@@ -31,15 +32,17 @@ public class ColorSwapMapConfig {
 	public final int z;
 	public final int xScale;
 	public final int zScale;
+	public final double spawnRadiusPadding;
 	public final BlockStateProvider initialStateProvider;
 	public final BlockStateProvider erasedStateProvider;
 	private final RegistryEntryList<Block> platformBlocks;
 
-	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, BlockStateProvider initialStateProvider, BlockStateProvider erasedStateProvider, RegistryEntryList<Block> platformBlocks) {
+	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, double spawnRadiusPadding, BlockStateProvider initialStateProvider, BlockStateProvider erasedStateProvider, RegistryEntryList<Block> platformBlocks) {
 		this.x = x;
 		this.z = z;
 		this.xScale = xScale;
 		this.zScale = zScale;
+		this.spawnRadiusPadding = spawnRadiusPadding;
 		this.initialStateProvider = initialStateProvider;
 		this.erasedStateProvider = erasedStateProvider;
 		this.platformBlocks = platformBlocks;
