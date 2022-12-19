@@ -1,22 +1,20 @@
 package io.github.haykam821.colorswap.game.prism.spawner;
 
-import java.util.Random;
-
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import io.github.haykam821.colorswap.game.prism.Prism;
 import io.github.haykam821.colorswap.game.prism.PrismConfig;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import xyz.nucleoid.map_templates.BlockBounds;
 
 public class PrismSpawner {
 	private static final int SPAWN_HEIGHT = 2;
-	private static final Text PRISM_SPAWNED_MESSAGE = new TranslatableText("text.colorswap.prism.spawned").formatted(Formatting.GOLD);
+	private static final Text PRISM_SPAWNED_MESSAGE = Text.translatable("text.colorswap.prism.spawned").formatted(Formatting.GOLD);
 
 	private final ColorSwapActivePhase phase;
 	private final PrismConfig config;
