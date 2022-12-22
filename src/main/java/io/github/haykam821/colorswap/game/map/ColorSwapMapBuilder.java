@@ -25,7 +25,7 @@ public class ColorSwapMapBuilder {
 		);
 
 		for (BlockPos pos : platform) {
-			template.setBlockState(pos, this.config.getMapConfig().initialStateProvider.getBlockState(random, pos));
+			template.setBlockState(pos, this.config.getMapConfig().initialStateProvider.get(random, pos));
 		}
 
 		return new ColorSwapMap(template, platform, mapConfig.spawnRadiusPadding);

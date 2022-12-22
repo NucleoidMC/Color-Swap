@@ -17,7 +17,7 @@ public class ColorSwapConfig {
 			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
 			PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
 			PrismConfig.CODEC.optionalFieldOf("prisms").forGetter(ColorSwapConfig::getPrismConfig),
-			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE).forGetter(ColorSwapConfig::getSwapSound),
+			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value()).forGetter(ColorSwapConfig::getSwapSound),
 			Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
 			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime),
 			Codec.INT.optionalFieldOf("no_knockback_rounds", -1).forGetter(ColorSwapConfig::getNoKnockbackRounds)
