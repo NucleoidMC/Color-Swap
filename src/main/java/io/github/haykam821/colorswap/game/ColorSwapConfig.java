@@ -7,8 +7,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import io.github.haykam821.colorswap.game.prism.PrismConfig;
+import net.minecraft.SharedConstants;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.intprovider.ConstantIntProvider;
+import net.minecraft.util.math.intprovider.IntProvider;
 import xyz.nucleoid.plasmid.game.common.config.PlayerConfig;
 
 public class ColorSwapConfig {
@@ -17,6 +20,7 @@ public class ColorSwapConfig {
 			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
 			PlayerConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
 			PrismConfig.CODEC.optionalFieldOf("prisms").forGetter(ColorSwapConfig::getPrismConfig),
+			IntProvider.NON_NEGATIVE_CODEC.optionalFieldOf("ticks_until_close", ConstantIntProvider.create(SharedConstants.TICKS_PER_SECOND * 5)).forGetter(ColorSwapConfig::getTicksUntilClose),
 			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value()).forGetter(ColorSwapConfig::getSwapSound),
 			Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
 			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime),
@@ -27,15 +31,17 @@ public class ColorSwapConfig {
 	private final ColorSwapMapConfig mapConfig;
 	private final PlayerConfig playerConfig;
 	private final Optional<PrismConfig> prisms;
+	private final IntProvider ticksUntilClose;
 	private final SoundEvent swapSound;
 	private final int swapTime;
 	private final int eraseTime;
 	private final int noKnockbackRounds;
 
-	public ColorSwapConfig(ColorSwapMapConfig mapConfig, PlayerConfig playerConfig, Optional<PrismConfig> prisms, SoundEvent swapSound, int swapTime, int eraseTime, int noKnockbackRounds) {
+	public ColorSwapConfig(ColorSwapMapConfig mapConfig, PlayerConfig playerConfig, Optional<PrismConfig> prisms, IntProvider ticksUntilClose, SoundEvent swapSound, int swapTime, int eraseTime, int noKnockbackRounds) {
 		this.mapConfig = mapConfig;
 		this.playerConfig = playerConfig;
 		this.prisms = prisms;
+		this.ticksUntilClose = ticksUntilClose;
 		this.swapSound = swapSound;
 		this.swapTime = swapTime;
 		this.eraseTime = eraseTime;
@@ -52,6 +58,10 @@ public class ColorSwapConfig {
 
 	public Optional<PrismConfig> getPrismConfig() {
 		return this.prisms;
+	}
+
+	public IntProvider getTicksUntilClose() {
+		return this.ticksUntilClose;
 	}
 
 	public SoundEvent getSwapSound() {

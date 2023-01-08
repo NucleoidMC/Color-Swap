@@ -64,6 +64,7 @@ public class ColorSwapActivePhase {
 	private final ColorSwapTimerBar timerBar;
 	private final PrismSpawner prismSpawner;
 	private int rounds = 0;
+	private int ticksUntilClose = -1;
 
 	public ColorSwapActivePhase(ServerWorld world, GameSpace gameSpace, ColorSwapMap map, ColorSwapConfig config, List<PlayerRef> players, GlobalWidgets widgets) {
 		this.world = world;
@@ -298,6 +299,16 @@ public class ColorSwapActivePhase {
 	}
 
 	public void tick() {
+		// Decrease ticks until game end to zero
+		if (this.isGameEnding()) {
+			if (this.ticksUntilClose == 0) {
+				this.gameSpace.close(GameCloseReason.FINISHED);
+			}
+
+			this.ticksUntilClose -= 1;
+			return;
+		}
+
 		this.ticksUntilSwap -= 1;
 		this.timerBar.tick(this);
 		if (this.ticksUntilSwap <= 0) {
@@ -337,7 +348,7 @@ public class ColorSwapActivePhase {
 
 			this.sendMessage(this.getEndingMessage());
 
-			this.gameSpace.close(GameCloseReason.FINISHED);
+			this.endGame();
 		}
 	}
 
@@ -389,6 +400,8 @@ public class ColorSwapActivePhase {
 	}
 
 	public void eliminate(ServerPlayerEntity eliminatedPlayer, boolean remove) {
+		if (this.isGameEnding()) return;
+
 		PlayerRef eliminatedRef = PlayerRef.of(eliminatedPlayer);
 		if (!this.players.contains(eliminatedRef)) return;
 
@@ -399,6 +412,14 @@ public class ColorSwapActivePhase {
 			this.players.remove(eliminatedRef);
 		}
 		this.setSpectator(eliminatedPlayer);
+	}
+
+	private void endGame() {
+		this.ticksUntilClose = this.config.getTicksUntilClose().get(this.world.getRandom());
+	}
+
+	private boolean isGameEnding() {
+		return this.ticksUntilClose >= 0;
 	}
 
 	public ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
