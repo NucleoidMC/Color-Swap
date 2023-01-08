@@ -1,17 +1,17 @@
 package io.github.haykam821.colorswap.game.map;
 
 import java.util.Optional;
-import java.util.Random;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryCodecs;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryEntryList;
+import net.minecraft.registry.RegistryCodecs;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.stateprovider.BlockStateProvider;
 
 public class ColorSwapMapConfig {
@@ -24,7 +24,7 @@ public class ColorSwapMapConfig {
 				Codec.DOUBLE.optionalFieldOf("spawn_radius_padding", 4d).forGetter(config -> config.spawnRadiusPadding),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("initial_state_provider", BlockStateProvider.of(Blocks.WHITE_WOOL)).forGetter(config -> config.initialStateProvider),
 				BlockStateProvider.TYPE_CODEC.optionalFieldOf("erased_state_provider", BlockStateProvider.of(Blocks.AIR)).forGetter(config -> config.erasedStateProvider),
-				RegistryCodecs.entryList(Registry.BLOCK_KEY).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
+				RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
 		).apply(instance, ColorSwapMapConfig::new);
 	});
 

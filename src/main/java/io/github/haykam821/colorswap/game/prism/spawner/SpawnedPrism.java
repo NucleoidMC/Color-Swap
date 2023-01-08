@@ -1,7 +1,5 @@
 package io.github.haykam821.colorswap.game.prism.spawner;
 
-import java.util.Random;
-
 import eu.pb4.holograms.api.Holograms;
 import eu.pb4.holograms.api.elements.HologramElement;
 import eu.pb4.holograms.api.elements.SpacingHologramElement;
@@ -19,11 +17,11 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import xyz.nucleoid.plasmid.util.PlayerRef;
 
 public class SpawnedPrism {
@@ -95,7 +93,7 @@ public class SpawnedPrism {
 		int slot = (9 - maximumHeld) / 2 + count;
 		inventory.setStack(slot, stack);
 
-		Text message = new TranslatableText("text.colorswap.prism.picked_up", player.getDisplayName()).formatted(Formatting.GOLD);
+		Text message = Text.translatable("text.colorswap.prism.picked_up", player.getDisplayName()).formatted(Formatting.GOLD);
 		this.spawner.getPhase().sendMessage(message);
 
 		return true;
@@ -109,9 +107,9 @@ public class SpawnedPrism {
 		ColorSwapActivePhase phase = this.spawner.getPhase();
 		Random random = phase.getWorld().getRandom();
 
-		double x = this.box.minX + random.nextDouble(this.box.getXLength());
-		double y = this.box.minY + random.nextDouble(this.box.getYLength());
-		double z = this.box.minZ + random.nextDouble(this.box.getZLength());
+		double x = this.box.minX + random.nextDouble() * this.box.getXLength();
+		double y = this.box.minY + random.nextDouble() * this.box.getYLength();
+		double z = this.box.minZ + random.nextDouble() * this.box.getZLength();
 
 		phase.getWorld().spawnParticles(PARTICLE, x, y, z, 1, 0, 0, 0, 0);
 	}

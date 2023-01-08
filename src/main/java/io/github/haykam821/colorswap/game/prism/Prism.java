@@ -7,7 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemStack.TooltipSection;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
@@ -29,7 +28,7 @@ public abstract class Prism {
 	public Text getName() {
 		if (this.name == null) {
 			Identifier id = Prisms.REGISTRY.getIdentifier(this);
-			return new TranslatableText(Util.createTranslationKey("prism", id));
+			return Text.translatable(Util.createTranslationKey("prism", id));
 		}
 
 		return this.name;

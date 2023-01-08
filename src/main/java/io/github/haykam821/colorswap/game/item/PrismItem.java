@@ -1,8 +1,9 @@
 package io.github.haykam821.colorswap.game.item;
 
-import eu.pb4.polymer.api.item.PolymerItem;
+import eu.pb4.polymer.core.api.item.PolymerItem;
 import io.github.haykam821.colorswap.game.prism.Prism;
 import io.github.haykam821.colorswap.game.prism.Prisms;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -18,11 +19,11 @@ public class PrismItem extends Item implements PolymerItem {
 	}
 
 	@Override
-	public ItemStack getPolymerItemStack(ItemStack stack, ServerPlayerEntity player) {
+	public ItemStack getPolymerItemStack(ItemStack stack, TooltipContext context, ServerPlayerEntity player) {
 		Prism prism = PrismItem.getPrism(stack);
-		ItemStack displayStack = prism == null ? PolymerItem.super.getPolymerItemStack(stack, player) : prism.createDisplayStack();
+		ItemStack displayStack = prism == null ? PolymerItem.super.getPolymerItemStack(stack, context, player) : prism.createDisplayStack();
 
-		return PolymerItem.super.getPolymerItemStack(displayStack, player);
+		return PolymerItem.super.getPolymerItemStack(displayStack, context, player);
 	}
 
 	@Override
