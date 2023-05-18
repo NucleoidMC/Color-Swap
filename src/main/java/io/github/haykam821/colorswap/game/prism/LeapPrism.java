@@ -5,7 +5,7 @@ import java.util.Collections;
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
