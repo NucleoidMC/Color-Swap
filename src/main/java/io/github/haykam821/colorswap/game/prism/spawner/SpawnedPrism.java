@@ -25,6 +25,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import xyz.nucleoid.plasmid.util.PlayerRef;
@@ -73,6 +74,7 @@ public class SpawnedPrism {
 		this.item = new ItemDisplayElement(this.prism.createDisplayStack());
 
 		this.item.setInterpolationDuration(1);
+		this.item.setLeftRotation(RotationAxis.POSITIVE_Y.rotation(MathHelper.PI));
 		this.item.setScale(new Vector3f(ITEM_SCALE));
 		this.item.setBillboardMode(BillboardMode.CENTER);
 
@@ -130,7 +132,7 @@ public class SpawnedPrism {
 		float angle = time / 10f;
 
 		Quaternionf rotation = new Quaternionf()
-			.rotateY(angle)
+			.rotateY(MathHelper.PI + angle)
 			.rotateZ(angle);
 
 		this.crystal.setLeftRotation(rotation);
