@@ -3,6 +3,7 @@ package io.github.haykam821.colorswap.game.prism;
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemStack.TooltipSection;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -19,10 +20,7 @@ public abstract class Prism {
 	public abstract Item getDisplayItem();
 
 	public ItemStack createDisplayStack() {
-		return ItemStackBuilder.of(this.getDisplayItem())
-			.addEnchantment(Enchantments.POWER, 0)
-			.hideFlag(TooltipSection.ENCHANTMENTS)
-			.build();
+		return Prism.createGlintStack(this.getDisplayItem());
 	}
 
 	public Text getName() {
@@ -32,5 +30,12 @@ public abstract class Prism {
 		}
 
 		return this.name;
+	}
+
+	public static ItemStack createGlintStack(ItemConvertible item) {
+		return ItemStackBuilder.of(item)
+			.addEnchantment(Enchantments.POWER, 0)
+			.hideFlag(TooltipSection.ENCHANTMENTS)
+			.build();
 	}
 }

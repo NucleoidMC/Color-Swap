@@ -3,7 +3,6 @@ package io.github.haykam821.colorswap.game.prism.spawner;
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import io.github.haykam821.colorswap.game.prism.Prism;
 import io.github.haykam821.colorswap.game.prism.PrismConfig;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
@@ -76,18 +75,6 @@ public class PrismSpawner {
 			if (this.roundsUntilSpawn == 0) {
 				this.spawnPrism();
 			}
-		}
-	}
-
-	public void addPlayer(ServerPlayerEntity player) {
-		if (this.spawnedPrism != null) {
-			this.spawnedPrism.addPlayer(player);
-		}
-	}
-
-	public void removePlayer(ServerPlayerEntity player) {
-		if (this.spawnedPrism != null) {
-			this.spawnedPrism.removePlayer(player);
 		}
 	}
 

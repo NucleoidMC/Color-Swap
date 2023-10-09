@@ -375,19 +375,11 @@ public class ColorSwapActivePhase {
 		return offer.accept(this.world, this.map.getCenter()).and(() -> {
 			this.updateRoundsExperienceLevel(offer.player());
 			this.setSpectator(offer.player());
-
-			if (this.prismSpawner != null) {
-				this.prismSpawner.addPlayer(offer.player());
-			}
 		});
 	}
 
 	public void removePlayer(ServerPlayerEntity player) {
 		this.eliminate(player, true);
-
-		if (this.prismSpawner != null) {
-			this.prismSpawner.removePlayer(player);
-		}
 	}
 
 	private boolean isKnockbackEnabled() {
