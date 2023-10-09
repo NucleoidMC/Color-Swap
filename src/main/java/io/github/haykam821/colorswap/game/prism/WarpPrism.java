@@ -24,7 +24,7 @@ public class WarpPrism extends Prism {
 			pos = hit.getPos();
 		}
 
-		if (player.teleport(pos.getX(), pos.getY(), pos.getZ(), true)) {
+		if (hit.getType() != HitResult.Type.MISS && player.teleport(pos.getX(), pos.getY(), pos.getZ(), true)) {
 			phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 0.3f, 1);
 			return true;
 		} else {

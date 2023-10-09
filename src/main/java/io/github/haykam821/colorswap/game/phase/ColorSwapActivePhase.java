@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import io.github.haykam821.colorswap.Main;
 import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.ColorSwapTimerBar;
@@ -22,6 +23,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -432,6 +434,11 @@ public class ColorSwapActivePhase {
 
 				return TypedActionResult.success(newStack);
 			}
+		}
+
+		if (PolymerItemUtils.getPolymerItemStack(stack, player).isOf(Items.ENDER_PEARL)) {
+			stack.increment(1);
+			player.getItemCooldownManager().set(Items.ENDER_PEARL, 0);
 		}
 
 		return TypedActionResult.pass(stack);
