@@ -51,6 +51,7 @@ public class SpawnedPrism {
 	private final ItemDisplayElement item;
 	private final ItemDisplayElement crystal = new ItemDisplayElement(CRYSTAL_STACK);
 
+	private final ElementHolder holder = new ElementHolder();
 	private final HolderAttachment attachment;
 
 	public SpawnedPrism(PrismSpawner spawner, PrismConfig config, Prism prism, BlockPos pos) {
@@ -82,14 +83,14 @@ public class SpawnedPrism {
 		this.crystal.setInterpolationDuration(1);
 		this.crystal.setScale(new Vector3f(CRYSTAL_SCALE));
 
-		ElementHolder holder = new ElementHolder();
+		this.holder.addElement(text);
+		this.holder.addElement(this.item);
+		this.holder.addElement(this.crystal);
 
-		holder.addElement(text);
-		holder.addElement(this.item);
-		holder.addElement(this.crystal);
+		this.updateDisplays();
 
 		ColorSwapActivePhase phase = this.spawner.getPhase();
-		this.attachment = ChunkAttachment.ofTicking(holder, phase.getWorld(), this.pos);
+		this.attachment = ChunkAttachment.of(this.holder, phase.getWorld(), this.pos);
 	}
 
 	public void remove() {
@@ -128,7 +129,7 @@ public class SpawnedPrism {
 	}
 
 	private void updateDisplays() {
-		long time = this.attachment.getWorld().getTime();
+		long time = this.spawner.getPhase().getWorld().getTime();
 		float angle = time / 10f;
 
 		Quaternionf rotation = new Quaternionf()
@@ -142,6 +143,8 @@ public class SpawnedPrism {
 
 		this.item.setScale(new Vector3f(ITEM_SCALE + scale, ITEM_SCALE + scale, ITEM_SCALE));
 		this.item.startInterpolation();
+
+		this.holder.tick();
 	}
 
 	private void spawnParticles() {
