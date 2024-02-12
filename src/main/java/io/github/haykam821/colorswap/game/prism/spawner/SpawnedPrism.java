@@ -151,9 +151,9 @@ public class SpawnedPrism {
 		ColorSwapActivePhase phase = this.spawner.getPhase();
 		Random random = phase.getWorld().getRandom();
 
-		double x = this.box.minX + random.nextDouble() * this.box.getXLength();
-		double y = this.box.minY + random.nextDouble() * this.box.getYLength();
-		double z = this.box.minZ + random.nextDouble() * this.box.getZLength();
+		double x = this.box.minX + random.nextDouble() * this.box.getLengthX();
+		double y = this.box.minY + random.nextDouble() * this.box.getLengthY();
+		double z = this.box.minZ + random.nextDouble() * this.box.getLengthZ();
 
 		phase.getWorld().spawnParticles(PARTICLE, x, y, z, 1, 0, 0, 0, 0);
 	}

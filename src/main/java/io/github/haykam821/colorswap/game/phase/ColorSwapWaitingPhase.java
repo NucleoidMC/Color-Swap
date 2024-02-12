@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
@@ -39,7 +40,7 @@ public class ColorSwapWaitingPhase {
 		ColorSwapConfig config = context.game().config();
 		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(config);
 
-		ColorSwapMap map = mapBuilder.create(context.server().getOverworld().getRandom());
+		ColorSwapMap map = mapBuilder.create(Random.createLocal());
 		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
 				.setGenerator(map.createGenerator(context.server()));
 
