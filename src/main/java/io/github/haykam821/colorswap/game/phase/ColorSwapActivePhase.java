@@ -185,7 +185,7 @@ public class ColorSwapActivePhase {
 					BlockState oldState = this.world.getBlockState(pos);
 					BlockState newState = erasedStateProvider.get(this.world.getRandom(), pos);
 
-					this.world.getWorldChunk(pos).setBlockState(pos, newState, false);
+					this.world.getWorldChunk(pos).setBlockState(pos, newState);
 					this.world.updateListeners(pos, oldState, newState, 0);
 				}
 			}
@@ -232,7 +232,7 @@ public class ColorSwapActivePhase {
 				pos.set(x, origin.getY(), z);
 
 				BlockState oldState = this.world.getBlockState(pos);
-				this.world.getWorldChunk(pos).setBlockState(pos, state, false);
+				this.world.getWorldChunk(pos).setBlockState(pos, state);
 				this.world.updateListeners(pos, oldState, state, 0);
 			}
 		}

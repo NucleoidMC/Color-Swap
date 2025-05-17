@@ -29,7 +29,7 @@ public class LeapPrism extends Prism {
 		Packet<?> packet = new ExplosionS2CPacket(Vec3d.ZERO, Optional.of(velocity), ParticleTypes.EXPLOSION, INTENTIONALLY_EMPTY);
 
 		player.networkHandler.sendPacket(packet);
-		phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.PLAYERS, 0.3f, 1.1f);
+		phase.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_HORSE_SADDLE.value(), SoundCategory.PLAYERS, 0.3f, 1.1f);
 
 		return true;
 	}
