@@ -4,19 +4,19 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-import net.minecraft.text.Style;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Style;
+import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 
 public final class RainbowTextColors {
 	private static final List<Style> STYLES = createStyles(new int[] {
-		Formatting.RED.getColorValue(),
-		Formatting.GOLD.getColorValue(),
-		Formatting.YELLOW.getColorValue(),
-		Formatting.GREEN.getColorValue(),
-		Formatting.BLUE.getColorValue(),
-		Formatting.LIGHT_PURPLE.getColorValue(),
+		ChatFormatting.RED.getColor(),
+		ChatFormatting.GOLD.getColor(),
+		ChatFormatting.YELLOW.getColor(),
+		ChatFormatting.GREEN.getColor(),
+		ChatFormatting.BLUE.getColor(),
+		ChatFormatting.LIGHT_PURPLE.getColor(),
 	});
 
 	private RainbowTextColors() {
@@ -24,10 +24,10 @@ public final class RainbowTextColors {
 	}
 
 	public static Style getInitialStyle() {
-		return STYLES.get(0);
+		return STYLES.getFirst();
 	}
 
-	public static Style getRandomStyle(Random random) {
+	public static Style getRandomStyle(RandomSource random) {
 		return Util.getRandom(STYLES, random);
 	}
 

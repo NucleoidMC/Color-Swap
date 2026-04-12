@@ -9,26 +9,24 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import io.github.haykam821.colorswap.game.prism.PrismConfig;
 import net.minecraft.SharedConstants;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.intprovider.ConstantIntProvider;
-import net.minecraft.util.math.intprovider.IntProvider;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProvider;
 import xyz.nucleoid.plasmid.api.game.common.config.WaitingLobbyConfig;
 
 public class ColorSwapConfig {
-	public static final MapCodec<ColorSwapConfig> CODEC = RecordCodecBuilder.mapCodec(instance -> {
-		return instance.group(
-			ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
-			WaitingLobbyConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
-			PrismConfig.CODEC.optionalFieldOf("prisms").forGetter(ColorSwapConfig::getPrismConfig),
-			Codec.INT.optionalFieldOf("guide_ticks", SharedConstants.TICKS_PER_SECOND * 10).forGetter(ColorSwapConfig::getGuideTicks),
-			IntProvider.NON_NEGATIVE_CODEC.optionalFieldOf("ticks_until_close", ConstantIntProvider.create(SharedConstants.TICKS_PER_SECOND * 5)).forGetter(ColorSwapConfig::getTicksUntilClose),
-			SoundEvent.CODEC.optionalFieldOf("swap_sound", SoundEvents.BLOCK_NOTE_BLOCK_SNARE.value()).forGetter(ColorSwapConfig::getSwapSound),
-			Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
-			Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime),
-			Codec.INT.optionalFieldOf("no_knockback_rounds", -1).forGetter(ColorSwapConfig::getNoKnockbackRounds)
-		).apply(instance, ColorSwapConfig::new);
-	});
+	public static final MapCodec<ColorSwapConfig> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        ColorSwapMapConfig.CODEC.fieldOf("map").forGetter(ColorSwapConfig::getMapConfig),
+        WaitingLobbyConfig.CODEC.fieldOf("players").forGetter(ColorSwapConfig::getPlayerConfig),
+        PrismConfig.CODEC.optionalFieldOf("prisms").forGetter(ColorSwapConfig::getPrismConfig),
+        Codec.INT.optionalFieldOf("guide_ticks", SharedConstants.TICKS_PER_SECOND * 10).forGetter(ColorSwapConfig::getGuideTicks),
+        IntProvider.NON_NEGATIVE_CODEC.optionalFieldOf("ticks_until_close", ConstantInt.of(SharedConstants.TICKS_PER_SECOND * 5)).forGetter(ColorSwapConfig::getTicksUntilClose),
+        SoundEvent.DIRECT_CODEC.optionalFieldOf("swap_sound", SoundEvents.NOTE_BLOCK_SNARE.value()).forGetter(ColorSwapConfig::getSwapSound),
+        Codec.INT.optionalFieldOf("swap_time", -1).forGetter(ColorSwapConfig::getSwapTime),
+        Codec.INT.optionalFieldOf("erase_time", -1).forGetter(ColorSwapConfig::getEraseTime),
+        Codec.INT.optionalFieldOf("no_knockback_rounds", -1).forGetter(ColorSwapConfig::getNoKnockbackRounds)
+    ).apply(instance, ColorSwapConfig::new));
 
 	private final ColorSwapMapConfig mapConfig;
 	private final WaitingLobbyConfig playerConfig;

@@ -3,26 +3,26 @@ package io.github.haykam821.colorswap.game.prism.spawner;
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
 import io.github.haykam821.colorswap.game.prism.Prism;
 import io.github.haykam821.colorswap.game.prism.PrismConfig;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import xyz.nucleoid.map_templates.BlockBounds;
 
 public class PrismSpawner {
 	private static final int SPAWN_HEIGHT = 2;
-	private static final Text PRISM_SPAWNED_MESSAGE = Text.translatable("text.colorswap.prism.spawned").formatted(Formatting.GOLD);
+	private static final Component PRISM_SPAWNED_MESSAGE = Component.translatable("text.colorswap.prism.spawned").withStyle(ChatFormatting.GOLD);
 
 	private final ColorSwapActivePhase phase;
 	private final PrismConfig config;
-	private final Random random;
+	private final RandomSource random;
 
 	private SpawnedPrism spawnedPrism;
 	private int roundsUntilSpawn;
 
-	public PrismSpawner(ColorSwapActivePhase phase, PrismConfig config, Random random) {
+	public PrismSpawner(ColorSwapActivePhase phase, PrismConfig config, RandomSource random) {
 		this.phase = phase;
 		this.config = config;
 		this.random = random;
@@ -31,7 +31,7 @@ public class PrismSpawner {
 	}
 
 	private void resetRoundsUntilSpawn() {
-		this.roundsUntilSpawn = this.config.roundsBetweenSpawns().get(this.random);
+		this.roundsUntilSpawn = this.config.roundsBetweenSpawns().sample(this.random);
 	}
 
 	private BlockPos getSpawnPos() {
@@ -48,8 +48,8 @@ public class PrismSpawner {
 			return new BlockPos(padding, y, padding);
 		}
 
-		int x = MathHelper.nextBetween(this.random, min.getX() + padding, max.getX() - padding);
-		int z = MathHelper.nextBetween(this.random, min.getZ() + padding, max.getZ() - padding);
+		int x = Mth.randomBetweenInclusive(this.random, min.getX() + padding, max.getX() - padding);
+		int z = Mth.randomBetweenInclusive(this.random, min.getZ() + padding, max.getZ() - padding);
 
 		return new BlockPos(x, y, z);
 	}
