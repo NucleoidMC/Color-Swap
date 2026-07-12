@@ -1,23 +1,23 @@
 package io.github.haykam821.colorswap.game.prism;
 
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
-import net.minecraft.item.Item;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
 public abstract class Prism {
-	private Text name;
+	private Component name;
 
-	public abstract boolean activate(ColorSwapActivePhase phase, ServerPlayerEntity player);
+	public abstract boolean activate(ColorSwapActivePhase phase, ServerPlayer player);
 
 	public abstract Item getDisplayItem();
 
-	public Text getName() {
+	public Component getName() {
 		if (this.name == null) {
 			Identifier id = Prisms.REGISTRY.getIdentifier(this);
-			return Text.translatable(Util.createTranslationKey("prism", id));
+			return Component.translatable(Util.makeDescriptionId("prism", id));
 		}
 
 		return this.name;

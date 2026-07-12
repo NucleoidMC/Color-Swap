@@ -21,6 +21,6 @@
 	"depends": {
 		"fabricloader": ">=0.5.0",
 		"java": ">=21",
-		"plasmid": "0.6.x"
+		"plasmid": "0.7.x"
 	}
 }

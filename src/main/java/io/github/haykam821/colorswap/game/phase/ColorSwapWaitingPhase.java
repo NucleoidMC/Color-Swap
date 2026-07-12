@@ -7,13 +7,13 @@ import io.github.haykam821.colorswap.game.ColorSwapConfig;
 import io.github.haykam821.colorswap.game.map.ColorSwapGuideText;
 import io.github.haykam821.colorswap.game.map.ColorSwapMap;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapBuilder;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.GameMode;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.GameType;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 import xyz.nucleoid.plasmid.api.game.GameOpenContext;
 import xyz.nucleoid.plasmid.api.game.GameOpenProcedure;
 import xyz.nucleoid.plasmid.api.game.GameResult;
@@ -30,15 +30,15 @@ import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
 public class ColorSwapWaitingPhase {
 	private final GameSpace gameSpace;
-	private final ServerWorld world;
+	private final ServerLevel level;
 	private final ColorSwapMap map;
 	private final ColorSwapConfig config;
 
 	private HolderAttachment guideText;
 
-	public ColorSwapWaitingPhase(GameSpace gameSpace, ServerWorld world, ColorSwapMap map, ColorSwapConfig config) {
+	public ColorSwapWaitingPhase(GameSpace gameSpace, ServerLevel level, ColorSwapMap map, ColorSwapConfig config) {
 		this.gameSpace = gameSpace;
-		this.world = world;
+		this.level = level;
 		this.map = map;
 		this.config = config;
 	}
@@ -46,13 +46,14 @@ public class ColorSwapWaitingPhase {
 	public static GameOpenProcedure open(GameOpenContext<ColorSwapConfig> context) {
 		ColorSwapConfig config = context.game().config();
 		ColorSwapMapBuilder mapBuilder = new ColorSwapMapBuilder(config);
+		ColorSwapMap map = mapBuilder.create(RandomSource.createThreadLocalInstance());
 
-		ColorSwapMap map = mapBuilder.create(Random.createLocal());
-		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
+		RuntimeLevelConfig levelConfig = new RuntimeLevelConfig()
 				.setGenerator(map.createGenerator(context.server()));
 
-		return context.openWithWorld(worldConfig, (game, world) -> {
-			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(game.getGameSpace(), world, map, config);
+		return context.openWithLevel(levelConfig, (game, level) -> {
+
+			ColorSwapWaitingPhase waiting = new ColorSwapWaitingPhase(game.getGameSpace(), level, map, config);
 
 			GameWaitingLobby.addTo(game, config.getPlayerConfig());
 			ColorSwapActivePhase.setRules(game);
@@ -70,21 +71,21 @@ public class ColorSwapWaitingPhase {
 
 	private void enable() {
 		// Spawn guide text
-		Vec3d guideTextPos = this.map.getGuideTextPos();
+		Vec3 guideTextPos = this.map.getGuideTextPos();
 
 		if (guideTextPos != null) {
-			Random random = this.world.getRandom();
+			RandomSource random = this.level.getRandom();
 
 			boolean knockback = this.config.getNoKnockbackRounds() >= 0;
 			boolean prisms = this.config.getPrismConfig().isPresent();
 
 			ElementHolder holder = ColorSwapGuideText.createElementHolder(random, knockback, prisms);
-			this.guideText = ChunkAttachment.of(holder, world, guideTextPos);
+			this.guideText = ChunkAttachment.of(holder, level, guideTextPos);
 		}
 	}
 
 	private void tick() {
-		for (ServerPlayerEntity player : this.gameSpace.getPlayers()) {
+		for (ServerPlayer player : this.gameSpace.getPlayers()) {
 			if (this.map.isBelowPlatform(player)) {
 				this.spawn(player);
 			}
@@ -92,23 +93,23 @@ public class ColorSwapWaitingPhase {
 	}
 
 	private JoinAcceptorResult onAcceptPlayer(JoinAcceptor acceptor) {
-		return acceptor.teleport(this.world, this.map.getWaitingSpawnPos())
-			.thenRunForEach(player -> player.changeGameMode(GameMode.ADVENTURE));
+		return acceptor.teleport(this.level, this.map.getWaitingSpawnPos())
+			.thenRunForEach(player -> player.setGameMode(GameType.ADVENTURE));
 	}
 
 	public GameResult requestStart() {
-		ColorSwapActivePhase.open(this.gameSpace, this.world, this.map, this.config, this.guideText);
+		ColorSwapActivePhase.open(this.gameSpace, this.level, this.map, this.config, this.guideText);
 		return GameResult.ok();
 	}
 
-	public EventResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+	public EventResult onPlayerDeath(ServerPlayer player, DamageSource source) {
 		// Respawn player at the start
 		this.spawn(player);
 		return EventResult.DENY;
 	}
 
-	private void spawn(ServerPlayerEntity player) {
-		Vec3d spawnPos = map.getWaitingSpawnPos();
-		ColorSwapActivePhase.spawn(this.world, spawnPos, 0, player);
+	private void spawn(ServerPlayer player) {
+		Vec3 spawnPos = map.getWaitingSpawnPos();
+		ColorSwapActivePhase.spawn(this.level, spawnPos, 0, player);
 	}
 }
