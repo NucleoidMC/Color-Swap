@@ -1,6 +1,7 @@
 package io.github.haykam821.colorswap.game.prism;
 
 import io.github.haykam821.colorswap.game.phase.ColorSwapActivePhase;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +25,7 @@ public class WarpPrism extends Prism {
 			pos = hit.getLocation();
 		}
 
-		if (hit.getType() != HitResult.Type.MISS && player.randomTeleport(pos.x(), pos.y(), pos.z(), true)) {
+		if (hit.getType() != HitResult.Type.MISS && player.randomTeleport(pos.x(), pos.y(), pos.z(), true, BlockTags.DANGEROUS_FOR_TELEPORTATION)) {
 			phase.getLevel().playSound(null, player, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.3f, 1);
 			return true;
 		} else {

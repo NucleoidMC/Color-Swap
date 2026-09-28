@@ -5,9 +5,9 @@ import java.util.Optional;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -24,7 +24,7 @@ public class ColorSwapMapConfig {
             Codec.DOUBLE.optionalFieldOf("spawn_radius_padding", 4d).forGetter(config -> config.spawnRadiusPadding),
             BlockState.CODEC.optionalFieldOf("initial_state_provider", Blocks.WOOL.white().defaultBlockState()).forGetter(config -> config.initialStateProvider),
             BlockState.CODEC.optionalFieldOf("erased_state_provider", Blocks.AIR.defaultBlockState()).forGetter(config -> config.erasedStateProvider),
-            RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
+            RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
     ).apply(instance, ColorSwapMapConfig::new));
 
 	public final int x;

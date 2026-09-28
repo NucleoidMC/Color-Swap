@@ -27,7 +27,7 @@ public class LeapPrism extends Prism {
 	@Override
 	public boolean activate(ColorSwapActivePhase phase, ServerPlayer player) {
 		Vec3 velocity = LeapPrism.getLeapVelocity(player);
-		Packet<?> packet = new ClientboundExplodePacket(Vec3.ZERO, 0, 0, Optional.of(velocity), ParticleTypes.EXPLOSION, INTENTIONALLY_EMPTY, WeightedList.of());
+		Packet<?> packet = new ClientboundExplodePacket(Vec3.ZERO, 0, 0, Optional.of(velocity), ParticleTypes.EXPLOSION, INTENTIONALLY_EMPTY, WeightedList.of(), false);
 
 		player.connection.send(packet);
 		phase.getLevel().playSound(null, player, SoundEvents.HORSE_SADDLE.value(), SoundSource.PLAYERS, 0.3f, 1.1f);
