@@ -22,8 +22,8 @@ public class ColorSwapMapConfig {
             Codec.INT.optionalFieldOf("x_scale", 3).forGetter(config -> config.xScale),
             Codec.INT.optionalFieldOf("z_scale", 3).forGetter(config -> config.zScale),
             Codec.DOUBLE.optionalFieldOf("spawn_radius_padding", 4d).forGetter(config -> config.spawnRadiusPadding),
-            BlockState.CODEC.optionalFieldOf("initial_state_provider", Blocks.WOOL.white().defaultBlockState()).forGetter(config -> config.initialStateProvider),
-            BlockState.CODEC.optionalFieldOf("erased_state_provider", Blocks.AIR.defaultBlockState()).forGetter(config -> config.erasedStateProvider),
+            BlockStateProvider.DIRECT_CODEC.optionalFieldOf("initial_state_provider", BlockStateProvider.of(Blocks.WOOL.white())).forGetter(config -> config.initialStateProvider),
+			BlockStateProvider.DIRECT_CODEC.optionalFieldOf("erased_state_provider", BlockStateProvider.of(Blocks.AIR)).forGetter(config -> config.erasedStateProvider),
             RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("platform_blocks").forGetter(config -> config.platformBlocks)
     ).apply(instance, ColorSwapMapConfig::new));
 
@@ -32,11 +32,11 @@ public class ColorSwapMapConfig {
 	public final int xScale;
 	public final int zScale;
 	public final double spawnRadiusPadding;
-	public final BlockState initialStateProvider;
-	public final BlockState erasedStateProvider;
+	public final BlockStateProvider initialStateProvider;
+	public final BlockStateProvider erasedStateProvider;
 	private final HolderSet<Block> platformBlocks;
 
-	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, double spawnRadiusPadding, BlockState initialStateProvider, BlockState erasedStateProvider, HolderSet<Block> platformBlocks) {
+	public ColorSwapMapConfig(int x, int z, int xScale, int zScale, double spawnRadiusPadding, BlockStateProvider initialStateProvider, BlockStateProvider erasedStateProvider, HolderSet<Block> platformBlocks) {
 		this.x = x;
 		this.z = z;
 		this.xScale = xScale;

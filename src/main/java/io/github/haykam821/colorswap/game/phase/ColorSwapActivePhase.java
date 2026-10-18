@@ -16,6 +16,7 @@ import io.github.haykam821.colorswap.game.map.ColorSwapMap;
 import io.github.haykam821.colorswap.game.map.ColorSwapMapConfig;
 import io.github.haykam821.colorswap.game.prism.Prism;
 import io.github.haykam821.colorswap.game.prism.spawner.PrismSpawner;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.damagesource.DamageSource;
@@ -205,10 +206,12 @@ public class ColorSwapActivePhase {
 		int xScale = this.prismSpawner == null ? mapConfig.xScale : 1;
 		int zScale = this.prismSpawner == null ? mapConfig.zScale : 1;
 
+		var random = RandomSource.createThreadLocalInstance();
+
 		for (int x = 0; x < mapConfig.x * mapConfig.xScale; x += xScale) {
 			for (int z = 0; z < mapConfig.z * mapConfig.zScale; z += zScale) {
 				pos.set(x, 64, z);
-				this.eraseTile(pos, xScale, zScale, mapConfig.erasedStateProvider);
+				this.eraseTile(pos, xScale, zScale, mapConfig.erasedStateProvider.getState(level, random, pos));
 			}
 		}
 	}
