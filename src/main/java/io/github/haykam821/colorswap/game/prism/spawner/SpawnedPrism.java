@@ -55,6 +55,7 @@ public class SpawnedPrism {
 
 	private final ElementHolder holder = new ElementHolder();
 	private final HolderAttachment attachment;
+	private int animationTick = 0;
 
 	public SpawnedPrism(PrismSpawner spawner, PrismConfig config, Prism prism, BlockPos pos) {
 		this.spawner = spawner;
@@ -134,7 +135,7 @@ public class SpawnedPrism {
 	}
 
 	private void updateDisplays() {
-		long time = this.spawner.getPhase().getLevel().getGameTime();
+		int time = this.animationTick++;
 		float angle = time / 10f;
 
 		Quaternionf rotation = new Quaternionf()
@@ -142,12 +143,12 @@ public class SpawnedPrism {
 			.rotateZ(angle);
 
 		this.crystal.setLeftRotation(rotation);
-		this.crystal.startInterpolation();
+		this.crystal.startInterpolationIfDirty();
 
 		float scale = Mth.cos(time / 3.5f) * ITEM_SCALE_VARIANCE;
 
 		this.item.setScale(new Vector3f(ITEM_SCALE + scale, ITEM_SCALE + scale, ITEM_SCALE));
-		this.item.startInterpolation();
+		this.item.startInterpolationIfDirty();
 
 		this.holder.tick();
 	}
